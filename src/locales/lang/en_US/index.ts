@@ -1,7 +1,7 @@
-import {MessageType} from "../../type.ts";
+import {MessageType} from "../../type";
 
 const en_US: MessageType = {
-  lang: 'english',
+  lang: 'English',
   header: {
     title: 'WX can help',
     actions: {
@@ -18,6 +18,9 @@ const en_US: MessageType = {
       },
       count: 'Number of global prayers'
     }
+  },
+  footer: {
+    pr: 'Make site better!'
   }
 }
 

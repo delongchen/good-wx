@@ -1,4 +1,4 @@
-import {MessageType} from "../../type.ts";
+import {MessageType} from "../../type";
 
 const zh_CN: MessageType = {
   lang: '简体中文',

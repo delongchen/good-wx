@@ -1,6 +1,6 @@
 import {reactive} from "vue";
 
-const api = '/api/muyu'
+const api = 'https://api.cnmd.life/wxsb/muyu'
 
 type UpdateFn = (latest: number, old: number) => Promise<void>
 

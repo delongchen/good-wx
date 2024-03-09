@@ -8,7 +8,7 @@
       <p>For wx, my good good bro.</p>
       <p>
         {{$t('footer.pr')}} >
-        <a class="git" target="_blank" href="https://github.com">GitHub</a>
+        <a class="git" target="_blank" href="https://github.com/delongchen/good-wx">GitHub</a>
       </p>
       <p>
         <span>Copyright © 2024 Delong</span>
