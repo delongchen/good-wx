@@ -20,10 +20,8 @@
 <style scoped lang="less">
 footer {
   flex: 0;
-  background-color: #94878e;
   padding-top: 20px;
   padding-bottom: 20px;
-  color: #38393a;
   display: flex;
   flex-direction: column;
   align-items: center;

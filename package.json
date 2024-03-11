@@ -11,9 +11,11 @@
   "dependencies": {
     "@vueuse/core": "^10.9.0",
     "vue": "^3.4.19",
-    "vue-i18n": "^9.10.1"
+    "vue-i18n": "^9.10.1",
+    "vue-router": "4"
   },
   "devDependencies": {
+    "@types/node": "^20.11.25",
     "@vitejs/plugin-vue": "^5.0.4",
     "less": "^4.2.0",
     "typescript": "^5.2.2",

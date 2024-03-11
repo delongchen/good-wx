@@ -1,9 +1,11 @@
 <script setup lang="ts">
+
 </script>
 
 <template>
-  <router-view/>
+  <div>rrrr</div>
 </template>
 
 <style scoped lang="less">
+
 </style>

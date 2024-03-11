@@ -2,10 +2,14 @@ import {MessageType} from "../../type";
 
 const zh_CN: MessageType = {
   lang: '简体中文',
-  header: {
-    title: '吴翔祈福',
-    actions: {
-      lang: '语言'
+  layout: {
+    app: {
+      header: {
+        title: '吴翔祈福',
+        actions: {
+          lang: '语言'
+        }
+      }
     }
   },
   main: {

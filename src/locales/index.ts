@@ -1,6 +1,6 @@
 import { useLocalStorage, usePreferredLanguages } from '@vueuse/core'
-import * as storeKeys from '../../../../../Desktop/charger/src/store/keys.ts'
-import { MessageType } from "./type.ts";
+import * as storeKeys from '@/store/keys'
+import { MessageType } from "./type";
 import { createI18n } from 'vue-i18n'
 
 export const DefaultLang = 'zh_CN'
@@ -17,6 +17,7 @@ const getLocale = (def: string) => {
   return fromLocal ?? (fromPreferred ?? def)
 }
 
+// todo: too ugly, will rewrite
 const initLangModules = () => {
   const modPaths = Object.keys(langModules)
 
@@ -46,3 +47,4 @@ export const i18n = createI18n({
   fallbackLocale: DefaultLang,
   globalInjection: true,
 })
+

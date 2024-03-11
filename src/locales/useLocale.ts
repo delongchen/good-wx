@@ -4,7 +4,7 @@ import {useLocalStorage} from "@vueuse/core";
 import * as storeKeys from '../../../../../Desktop/charger/src/store/keys.ts'
 
 export const useLocale = () => {
-  const { locale } = useI18n({useScope: 'global'})
+  const { locale, t } = useI18n({useScope: 'global'})
   const localeStore = useLocalStorage(storeKeys.locale, DefaultLang)
 
   const changeLocale = (lang: string) => {
@@ -16,8 +16,13 @@ export const useLocale = () => {
     localeStore.value = lang
   }
 
+  const getT = (prefix: string = '') => {
+    if (prefix === '') return (key: string) => t(key)
+    return (key: string) => t(`${prefix}.${key}`)
+  }
+
   return {
-    locale,
-    changeLocale
+    changeLocale,
+    getT
   }
 }

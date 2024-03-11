@@ -1,27 +1,39 @@
 <script setup lang="ts">
-import {langList} from "../locales";
-import {useLocale} from "../locales/useLocale.ts";
+import {langList} from "@/locales";
+import {useLocale} from "@/locales/useLocale";
 import {ref} from "vue";
+import {useRouter} from "vue-router";
 
-const locale = useLocale()
+const router = useRouter()
+const {changeLocale, getT} = useLocale()
 
 const showLangSelector = ref(false)
 
 const changeLang = (lang: string) => {
-  locale.changeLocale(lang)
+  changeLocale(lang)
   showLangSelector.value = false
 }
+
+const goHome = () => {
+  router.push('/').then(() => {
+    scroll({
+      top: 0,
+    })
+  })
+}
+
+const t = getT('layout.app.header')
 </script>
 
 <template>
   <header>
     <div class="header-content">
       <div class="header-title">
-        <div class="logo">{{$t('header.title')}}_</div>
+        <div class="logo" @click="goHome">{{ t('title') }}_</div>
       </div>
       <div class="header-actions">
         <div class="header-action-item">
-          <div class="lang-selector-btn" @click="showLangSelector = !showLangSelector">{{$t('header.actions.lang')}}</div>
+          <div class="lang-selector-btn" @click="showLangSelector = !showLangSelector">{{ t('actions.lang') }}</div>
           <div
             class="lang-selector-items"
             v-show="showLangSelector"
@@ -32,7 +44,8 @@ const changeLang = (lang: string) => {
               :key="`lang-${key}`"
               class="lang-selector-item"
               @click="changeLang(lang.value)"
-            >{{lang.content}}</div>
+            >{{ lang.content }}
+            </div>
           </div>
         </div>
       </div>
@@ -63,6 +76,7 @@ header {
 
 .logo {
   font-size: xx-large;
+  cursor: pointer;
 }
 
 .lang-selector-btn {
