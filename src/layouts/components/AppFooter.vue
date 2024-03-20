@@ -20,11 +20,15 @@
 <style scoped lang="less">
 footer {
   flex: 0;
+  margin-top: 100px;
   padding-top: 20px;
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  background-color: #94878e;
+  color: #38393a;
 }
 
 .git {

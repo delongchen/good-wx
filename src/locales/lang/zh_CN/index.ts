@@ -2,6 +2,11 @@ import {MessageType} from "../../type";
 
 const zh_CN: MessageType = {
   lang: '简体中文',
+  router: {
+    muyu: '祈福',
+    resonance: '开火车',
+    about: '关于',
+  },
   layout: {
     app: {
       header: {

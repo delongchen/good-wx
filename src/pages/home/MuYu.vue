@@ -30,7 +30,7 @@ counter.onUpdate(async (latest, old) => {
 </script>
 
 <template>
-  <div style="color: #94878e; background-color: #38393a;">
+  <div>
     <div class="wx-desc">
       <p>{{$t('main.wx.desc.line1')}}</p>
       <p>{{$t('main.wx.desc.line2')}}</p>
@@ -96,6 +96,19 @@ counter.onUpdate(async (latest, old) => {
     top: 0;
     right: 0;
     font-size: larger;
+  }
+}
+
+.links-container {
+  margin-bottom: 100px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  div {
+    cursor: pointer;
+    margin: 10px;
   }
 }
 </style>

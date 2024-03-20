@@ -5,7 +5,7 @@ import {useRoute} from "vue-router";
 import {foundTop} from "@/router";
 import {computed} from "vue";
 
-const topLevelStyle = computed<object>(
+const topLevelStyle = computed<any>(
   () => foundTop(useRoute().fullPath)?.meta?.style ?? null
 )
 </script>

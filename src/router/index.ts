@@ -13,7 +13,7 @@ const fixedModules = import.meta.glob(
 const defaultRouterList: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/home'
+    redirect: '/home',
   }
 ]
 

@@ -1,3 +1,0 @@
-const getModuleDefaultExports = (mod: unknown) => {
-
-}

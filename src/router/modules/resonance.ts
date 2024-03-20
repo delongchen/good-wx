@@ -1,22 +1,21 @@
 import {RouteRecordRaw} from "vue-router";
-import AppLayout from "@/layouts/AppLayout.vue";
-import {defineCSS} from "@/utils/type";
 
 const resonancePageRouter: RouteRecordRaw[] = [
   {
     path: '/resonance',
-    component: AppLayout,
-    redirect: '/resonance/info',
+    redirect: '/resonance/goods',
+    component: () => import('@/pages/resonance/Resonance.vue'),
     meta: {
-      style: defineCSS({
-        backgroundColor: 'black',
-        color: 'white'
-      })
+      title: '#resonance'
     },
     children: [
       {
-        path: 'info',
-        component: () => import('@/pages/resonance/Resonance.vue')
+        path: 'goods',
+        component: () => import('@/pages/resonance/RGoods.vue')
+      },
+      {
+        path: 'goods-city',
+        component: () => import('@/pages/resonance/RGoodsCity.vue')
       }
     ]
   }
