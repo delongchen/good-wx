@@ -1,6 +1,5 @@
-
 export const timeDistance = (time: number) => {
-  const now = Date.now() + (8 * 60 * 60 * 1000)
+  const now = Date.now()
   const diff = now - time
 
   if (diff < (60 * 1000)) {

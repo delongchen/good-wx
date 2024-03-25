@@ -5,3 +5,4 @@ const createSubKey = (...keys: string[]) => {
 }
 
 export const locale = createSubKey('locale')
+export const resonance = createSubKey('resonance')

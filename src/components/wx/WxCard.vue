@@ -3,15 +3,21 @@ import WxBaseCard from "@/components/wx/WxBaseCard.vue";
 
 const props = defineProps<{
   title?: string,
+  titleSize?: string,
   subTitle?: string,
+  headerMargin?: string
 }>()
 </script>
 
 <template>
   <wx-base-card>
-    <div class="wx-card-header" v-if="props.title">
+    <div
+      class="wx-card-header"
+      v-if="props.title"
+      :style="{margin: props.headerMargin ?? ''}"
+    >
       <div class="wx-card-header-title">
-        <div class="wx-card-header-title-text">{{props.title}}</div>
+        <div class="wx-card-header-title-text" :style="{ fontSize: props.titleSize ?? '' }">{{props.title}}</div>
         <div class="wx-card-header-actions"><slot name="actions"/></div>
       </div>
       <div class="wx-card-header-sub-title">{{props.subTitle}}</div>

@@ -6,6 +6,7 @@ const zh_CN: MessageType = {
     muyu: '祈福',
     resonance: '开火车',
     about: '关于',
+    teller: '小说'
   },
   layout: {
     app: {

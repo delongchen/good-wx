@@ -49,9 +49,13 @@ const cards: HomeCardType[] = [
   },
   {
     title: 'wx小说',
-    sub: '即将到来',
-    path: '',
-    desc: []
+    sub: '深黑幻想',
+    path: '/teller',
+    desc: [
+      '陨落的天才',
+      '外门弟子唐三',
+      '尽在其中'
+    ]
   }
 ]
 </script>
@@ -63,7 +67,7 @@ const cards: HomeCardType[] = [
       static
       text="wu#xiang#smart#boy"
       upper-size="xxx-large"
-      end-with="_智慧吴翔"
+      end-with="_"
     />
     <div style="font-size: xxx-large">
       综合性吴翔社区

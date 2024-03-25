@@ -24,7 +24,9 @@ const pushPath = (path: string) => {
 
 const actionList = computed(() => {
   return allRoutes
-    .filter(item => typeof item?.meta?.title === 'string')
+    .filter(item =>
+      typeof item?.meta?.title === 'string'
+    )
     .map(item => {
       const ret = {
         path: item.path,
