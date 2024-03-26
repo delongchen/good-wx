@@ -36,9 +36,16 @@ const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfo[][]] => {
       const offset = lineStart + 2 + itemIndex * itemSize
 
       const price = v.getUint8(offset)
-      const time = v.getFloat64(offset + 1)
-      const limit = v.getUint8(offset + 9)
-      const profit = v.getInt16(offset + 10)
+      const limit = v.getUint8(offset + 1)
+      const profit = v.getInt16(offset + 2)
+      const h = v.getUint8(offset + 4)
+      const m = v.getUint8(offset + 5)
+      const s = v.getUint8(offset + 6)
+      const date = new Date()
+      date.setHours(h)
+      date.setMinutes(m)
+      date.setSeconds(s)
+      const time = date.getTime()
       const trend = (trendVec & (1 << itemIndex)) === 0 ? 0 : 1
 
       lineData.push({
@@ -53,7 +60,10 @@ const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfo[][]] => {
 }
 
 const fetchGoodsBaseInfo = (): Promise<ArrayBuffer | null> =>
-  fetch('http://localhost:11451/resonance/goods')
+  fetch(
+    //'https://api.cnmd.life/wxsb/resonance/goods'
+    'http://localhost:11451/resonance/goods'
+  )
     .then(res => res.arrayBuffer())
     .catch(() => null)
 

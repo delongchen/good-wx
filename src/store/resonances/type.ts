@@ -10,6 +10,11 @@ export interface RGoodsAsyncInfo {
   profit: number
 }
 
+export interface RGoodsAsyncInfoPlus extends RGoodsAsyncInfo {
+  cityName: string
+  distance: number
+}
+
 export interface RGoodsBaseInfo {
   cityId: number
   cityName: string

@@ -16,6 +16,10 @@ const resonancePageRouter: RouteRecordRaw[] = [
       {
         path: 'goods-city',
         component: () => import('@/pages/resonance/RGoodsCity.vue')
+      },
+      {
+        path: 'goods-favorite',
+        component: () => import('@/pages/resonance/RGoodsFavorite.vue')
       }
     ]
   }

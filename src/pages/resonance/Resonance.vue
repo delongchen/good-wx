@@ -12,6 +12,10 @@ const links = [
   {
     text: '城市交易表',
     path: '/resonance/goods-city'
+  },
+  {
+    text: '特别关注',
+    path: '/resonance/goods-favorite'
   }
 ]
 

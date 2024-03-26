@@ -201,10 +201,25 @@ export const StaticData: {
   ]
 }
 
+let goodsCount = 0
+export const nameMapWithId: [string, {name: string, id: number}[]][] = StaticData.nameMap.map(it => {
+  return [
+    it[0],
+    it[1].map(goodsName => ({
+      name: goodsName,
+      id: goodsCount++,
+    }))
+  ]
+})
+
 export const distanceOf = (a: number, b: number) => {
   return StaticData.distance?.[a]?.[b] ?? 0;
 }
 
 export const getCityName = (id: number) => {
   return StaticData.nameMap?.[id]?.[0] ?? ''
+}
+
+export {
+  goodsCount
 }
