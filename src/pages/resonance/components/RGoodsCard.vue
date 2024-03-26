@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {RGoodsAsyncInfoPlus, RGoodsInfo} from "@/store/resonances/type";
+import {RGoodsAsyncInfo, RGoodsInfo} from "@/store/resonances/type";
 import WxCard from "@/components/wx/WxCard.vue";
 import {computed, ref} from "vue";
 import RGoodsStatistic from "@/pages/resonance/components/RGoodsStatistic.vue";
@@ -13,7 +13,7 @@ const props = defineProps<{
 }>()
 
 const saleInfo = computed(() => {
-  const result: RGoodsAsyncInfoPlus[] = []
+  const result: RGoodsAsyncInfo[] = []
   const sort = presetSorts.get(setting.value.sortID)
 
   for (let i = 0; i < props.info.saleInfo.length; i++) {
@@ -46,11 +46,7 @@ const showMore = ref(false)
     <template #content>
       <div class="r-goods-card-content">
         <r-goods-statistic
-          :info="{
-            ...props.info.buyInfo,
-            distance: 0,
-            cityName: '原产地'
-          }"
+          :info="info.buyInfo"
         />
         <div style="margin: 0 20px 0 20px;">
           <swap-right-icon size="xx-large"/>

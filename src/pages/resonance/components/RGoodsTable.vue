@@ -21,10 +21,13 @@ const goodsList = computed(() => {
   const favoriteSet = new Set(setting.value.favoriteGoods)
   const normal: RGoodsInfo[] = []
   const favorite: RGoodsInfo[] = []
+  let rating = 0
 
   for (const index of props.goodsSet) {
     const goods = infoVecRef.value[index]
+
     if (goods !== undefined && !exclude.has(goods.baseInfo.goodsId)) {
+      rating += goods.rating()
       if (favoriteSet.has(goods.baseInfo.goodsId)) {
         favorite.push(goods)
       } else {
@@ -38,9 +41,12 @@ const goodsList = computed(() => {
     favorite.sort(sort.whole)
   }
 
+  rating = (((rating / props.goodsSet.size) * 100) >> 0) / 100
+
   return {
     normal,
-    favorite
+    favorite,
+    rating
   }
 })
 
@@ -49,7 +55,10 @@ const sortMethod = computed(() => {
 })
 
 const setSortMethod = (id: string) => {
-  if (setting.value.sortID !== id) {
+  if (
+    setting.value.sortID !== id &&
+    presetSorts.has(id)
+  ) {
     setting.value.sortID = id
   }
 }
@@ -181,6 +190,11 @@ const favoriteGoods = useGoodsSelector(
   </div>
 
   <div>
+    <div class="r-goods-table-rating">
+      <span>平均利润率: </span>
+      <span style="color: white; font-size: larger;">{{goodsList.rating}}</span>
+      <span>%</span>
+    </div>
     <template v-if="goodsList.favorite.length !== 0">
       <h2>特别关心</h2>
       <r-goods-card
@@ -239,20 +253,10 @@ const favoriteGoods = useGoodsSelector(
   flex-wrap: wrap;
 }
 
-.r-goods-table-setting-exclude-goods {
-  padding-left: @app-space;
-  display: flex;
-  flex-direction: column;
-
-  .exclude-goods-selector {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .exclude-goods-selector-item {
-    padding: 4px;
-    cursor: pointer;
+.r-goods-table-rating {
+  margin-top: @app-space;
+  span {
+    color: #aeafaf;
   }
 }
 </style>

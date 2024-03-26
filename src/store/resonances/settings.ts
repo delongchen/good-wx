@@ -16,13 +16,14 @@ const defaultSetting: () => RSetting =
       19, 24, 31, 32, 33, 38,
       43, 48, 49, 53
     ],
-    favoriteGoods: [2]
+    favoriteGoods: []
   })
 
 export const setting = useLocalStorage(keys.resonance.setting, defaultSetting())
 
 if (isAppUpdated()) {
   setting.value.sortID = 'max-price'
+  setting.value.favoriteGoods = []
 }
 
 export const setToDefault = () => {

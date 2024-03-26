@@ -3,7 +3,7 @@ import {sleep} from "@/utils/time.ts";
 import {
   RGoodsInfo,
   emptyInfoVec,
-  RGoodsAsyncInfo
+  RGoodsAsyncInfoRaw
 } from './type'
 
 const infoVec: RGoodsInfo[] = emptyInfoVec()
@@ -12,10 +12,10 @@ export const infoVecRef = ref(infoVec)
 
 export const latestUpdate = ref(0)
 
-const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfo[][]] => {
+const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfoRaw[][]] => {
   const v = new DataView(buf)
 
-  const result: RGoodsAsyncInfo[][] = []
+  const result: RGoodsAsyncInfoRaw[][] = []
   const cityNum = v.getUint8(0)
   const goodsNum = v.getUint8(1)
   const itemSize = v.getUint8(2)
@@ -29,7 +29,7 @@ const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfo[][]] => {
 
   for (let goodsIndex = 0; goodsIndex < goodsNum; goodsIndex++) {
     const lineStart = bodyStart + lineSize * goodsIndex
-    const lineData: RGoodsAsyncInfo[] = []
+    const lineData: RGoodsAsyncInfoRaw[] = []
     const trendVec = v.getUint16(lineStart)
 
     for (let itemIndex = 0; itemIndex < cityNum + 1; itemIndex++) {
@@ -67,7 +67,7 @@ const fetchGoodsBaseInfo = (): Promise<ArrayBuffer | null> =>
     .then(res => res.arrayBuffer())
     .catch(() => null)
 
-const updateAsyncInfo = (next: RGoodsAsyncInfo, old: RGoodsAsyncInfo) => {
+const updateAsyncInfo = (next: RGoodsAsyncInfoRaw, old: RGoodsAsyncInfoRaw) => {
   old.price = next.price
   old.trend = next.trend
   old.time = next.time
@@ -88,22 +88,27 @@ const updateGoodsInfo = async () => {
     const old = infoVec[line]
     const next = infoMap[line]
 
-    if (old.buyInfo.time !== next[0].time) {
-      updateAsyncInfo(
-        next[0],
-        infoVecRef.value[line].buyInfo
-      )
-    }
-
     const nextSale = next.slice(1)
     const oldSale = old.saleInfo
+    let maxLimit = Number.MIN_SAFE_INTEGER
     for (let city = 0; city < oldSale.length; city++) {
+      if (nextSale[city].limit > maxLimit) {
+        maxLimit = nextSale[city].limit
+      }
       if (oldSale[city].time !== nextSale[city].time) {
         updateAsyncInfo(
           nextSale[city],
           infoVecRef.value[line].saleInfo[city]
         )
       }
+    }
+
+    next[0].limit = maxLimit
+    if (old.buyInfo.time !== next[0].time) {
+      updateAsyncInfo(
+        next[0],
+        infoVecRef.value[line].buyInfo
+      )
     }
   }
 

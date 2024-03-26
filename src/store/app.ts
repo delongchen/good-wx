@@ -6,12 +6,16 @@ interface AppInfo {
 }
 
 const newAppInfo = (): AppInfo => ({
-  version: '0.0.2'
+  version: '0.0.5'
 })
+
+const initInfo: AppInfo = {
+  version: ''
+}
 
 const latestAppInfo = newAppInfo()
 
-const appStore = useLocalStorage(keys.app, newAppInfo())
+const appStore = useLocalStorage(keys.app, initInfo)
 
 let updated = false
 export const isAppUpdated = () => updated

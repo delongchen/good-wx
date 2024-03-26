@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {RGoodsAsyncInfoPlus} from "@/store/resonances/type";
+import {RGoodsAsyncInfo} from "@/store/resonances/type";
 import {computed} from "vue";
 import {timeDistance} from "@/utils/time";
 import {TrendingDownIcon, TrendingUpIcon} from "tdesign-icons-vue-next";
 
 const props = defineProps<{
-  info: RGoodsAsyncInfoPlus,
+  info: RGoodsAsyncInfo,
   margin?: string,
 }>()
 
@@ -35,10 +35,17 @@ const color = computed<string>(() => {
     </div>
     <div
       class="r-goods-statistic-desc"
-      v-if="props.info.distance !== 0"
     >
-      {{props.info.profit}}$ / {{props.info.distance}}
-      <span style="color: #aeafaf">km</span>
+      <div v-if="props.info.distance !== 0">
+        {{props.info.profit}}$ / {{props.info.distance}}
+        <span style="color: #aeafaf">km</span>
+      </div>
+      <div v-else-if="props.info.limit !== 0">
+        {{props.info.limit}}件 / 单
+      </div>
+      <div v-else>
+        手工商品
+      </div>
     </div>
   </div>
 </template>
