@@ -61,8 +61,8 @@ const decodeBuffer = (buf: ArrayBuffer): [number, RGoodsAsyncInfoRaw[][]] => {
 
 const fetchGoodsBaseInfo = (): Promise<ArrayBuffer | null> =>
   fetch(
-    //'https://api.cnmd.life/wxsb/resonance/goods'
-    'http://localhost:11451/resonance/goods'
+    'https://api.cnmd.life/wxsb/resonance/goods'
+    //'http://localhost:11451/resonance/goods'
   )
     .then(res => res.arrayBuffer())
     .catch(() => null)

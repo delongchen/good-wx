@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 </script>
 
 <template>
@@ -13,7 +12,11 @@
 
 .wx-base-card {
   padding: @card-space;
-  border-radius: 4px;
+  border-radius: 10px;
   background-color: @app-black-lighter;
+
+  @media @max960 {
+    padding: 10px;
+  }
 }
 </style>

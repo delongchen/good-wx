@@ -2,6 +2,18 @@ import {MessageType} from "../../type";
 
 const zh_CN: MessageType = {
   lang: '简体中文',
+  pages: {
+    teller: {
+      components: {
+        tabBar: {
+          library: '书架',
+          shop: '书城',
+          rule: '规则',
+          home: '我的',
+        }
+      }
+    }
+  },
   router: {
     muyu: '祈福',
     resonance: '开火车',
