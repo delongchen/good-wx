@@ -9,3 +9,6 @@ export const locale = createSubKey('locale')
 export const resonance = {
   setting: createSubKey('resonance', 'setting')
 }
+export const teller = {
+  history: createSubKey('teller', 'history')
+}

@@ -50,11 +50,13 @@ const tabList = computed(() => {
   const result: LinkItem[] = []
 
   for (const r of TellerSubRouter) {
+    const index = r?.meta?.index
+    if (index === undefined) continue
     const text = <string>r?.meta?.text ?? ''
     result.push({
+      index: <number>index,
       path: r.path,
       text: text.startsWith('#') ? t(text.slice(1)) : text,
-      index: r?.meta?.index ?? 0,
       selected: route.fullPath.startsWith(r.path)
     })
   }

@@ -32,6 +32,30 @@ export const TellerSubRouter: RouteRecordRaw[] = [
       index: 3,
       text: '#home',
     },
+  },
+  {
+    name: 'book-detail',
+    path: '/teller/book-detail',
+    component: () => import('@/pages/teller/BookDetailPage.vue'),
+    meta: {
+      hideTabBar: true
+    }
+  },
+  {
+    name: 'book-index',
+    path: '/teller/book-index',
+    component: () => import('@/pages/teller/BookIndexPage.vue'),
+    meta: {
+      hideTabBar: true
+    }
+  },
+  {
+    name: 'reading',
+    path: '/teller/reading',
+    component: () => import('@/pages/teller/ReadingPage.vue'),
+    meta: {
+      hideTabBar: true
+    }
   }
 ]
 

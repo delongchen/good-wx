@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import TellerTabBar from "@/pages/teller/components/TellerTabBar.vue";
+import {useRoute} from "vue-router";
+import {computed} from "vue";
+
+const route = useRoute()
+const showTabBar = computed(() => {
+  return route?.meta?.hideTabBar !== true
+})
 </script>
 
 <template>
   <div class="teller-main-layout">
-    <div class="teller-page-content">
+    <div :class="{
+      'teller-page-content': showTabBar
+    }">
       <router-view/>
     </div>
-    <teller-tab-bar/>
+    <teller-tab-bar v-if="showTabBar"/>
   </div>
 </template>
 
