@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { ChevronLeftIcon } from 'tdesign-icons-vue-next'
 import {useRouter} from "vue-router";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 
 const props = defineProps<{
   hideBack?: boolean,
   title?: string,
   contentPadding?: string,
-  clickToHideBar?: boolean
-  clickToHideHeader?: boolean
+  hideAt?: ('click' | 'scroll')[]
 }>()
 
 const { back } = useRouter()
@@ -16,12 +15,23 @@ const { back } = useRouter()
 const showHeader = ref(true)
 const showBar = ref(true)
 
-const handleContentClick = () => {
-  if (props.clickToHideHeader) {
-    showHeader.value = !showHeader.value
-  }
-  if (props.clickToHideBar) {
+const hideAtSet = computed<Set<string>>(() => {
+  return new Set(props.hideAt ?? [])
+})
+
+const handleHide = (ev: Event) => {
+  if (hideAtSet.value.size === 0) return
+
+  const evType = ev.type
+  if (evType === 'click' && hideAtSet.value.has('click')) {
     showBar.value = !showBar.value
+    showHeader.value = !showHeader.value
+    return
+  }
+
+  if (hideAtSet.value.has(evType)) {
+    showBar.value = false
+    showHeader.value = false
   }
 }
 </script>
@@ -44,7 +54,8 @@ const handleContentClick = () => {
     <div
       class="teller-sub-layout-content"
       :style="props.contentPadding ? `padding: ${props.contentPadding};` : null"
-      @click="handleContentClick"
+      @click="handleHide"
+      @scroll="handleHide"
     >
       <slot name="default"/>
     </div>
@@ -80,7 +91,8 @@ const handleContentClick = () => {
 
 .teller-sub-layout-content {
   padding: @top-space 0 @bottom-space 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: scroll;
 }
 
 .teller-sub-layout-bar {

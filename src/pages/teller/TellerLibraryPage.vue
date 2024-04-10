@@ -35,14 +35,18 @@ const bookList = computed(getLibList)
         <div>
           <div style="font-size: large; font-weight: bold;">{{book.index.name}}</div>
           <div style="font-size: smaller; color: #6d6e6f;">
-            <span v-if="book.history !== 0">{{book.history}}章/</span>
             {{book.chapters.length}}章
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div v-else></div>
+  <div v-else>
+    <div class="lib-empty">
+      <div>空空如也</div>
+      <div>快去书城看看吧</div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="less">
@@ -73,6 +77,16 @@ const bookList = computed(getLibList)
 .book-text {
   flex: 1;
   display: flex;
+  align-items: center;
+}
+
+.lib-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 </style>

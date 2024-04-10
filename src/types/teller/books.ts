@@ -16,20 +16,10 @@ export interface BookIndex {
   cover?: string
 }
 
-export interface BookDetailRaw {
-  index: BookIndex,
-  chapters: string[]
-}
-
 export interface BookChapterRaw {
   title: string,
-  paragraph: string[][]
-}
-
-export interface BookDetail {
-  index: BookIndex,
-  history: number,
-  chapters: BookChapterRaw[]
+  key: string,
+  paragraph: string[][],
 }
 
 interface TextChunk {
@@ -39,6 +29,17 @@ type TextLine = TextChunk[]
 export type TextParagraph = TextLine[]
 
 export interface BookChapterType {
+  key: string,
   title: string,
   paragraphs: TextParagraph[]
+}
+
+export interface BookDetailRaw {
+  index: BookIndex,
+  chapters: string[]
+}
+
+export interface BookDetail {
+  index: BookIndex,
+  chapters: BookChapterRaw[]
 }

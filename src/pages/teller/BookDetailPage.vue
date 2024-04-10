@@ -45,6 +45,16 @@ const goBookIndex = () => {
 
 const download = () => {
 }
+
+const readNow = () => {
+  if (uid.value !== 0) {
+    addToLib()
+    router.push({
+      name: 'reading',
+      query: { uid: uid.value }
+    })
+  }
+}
 </script>
 
 <template>
@@ -117,6 +127,12 @@ const download = () => {
           <div class="action-text">
             {{isInLib ? '已添加': '加书架'}}
           </div>
+        </div>
+        <div
+          class="book-detail-actions"
+          @click="readNow"
+        >
+          <div>立即阅读</div>
         </div>
       </div>
     </template>

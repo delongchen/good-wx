@@ -48,28 +48,9 @@ export const allRoutes: RouteRecordRaw[] = [
   ...defaultRouterList,
 ]
 
-const routesMap: Map<string, RouteRecordRaw> = new Map(
-  allRoutes
-    .filter(r => r.path !== '/')
-    .map(r => [r.path, r])
-)
-
 const router = createRouter({
   history: createWebHistory(),
   routes: allRoutes,
 })
-
-export const foundTop = (path: string): RouteRecordRaw | null => {
-  // skip '/'
-  const [_, top] = path.split('/')
-  if (top !== undefined) {
-    const exist = routesMap.get(`/${top}`)
-    if (exist !== undefined) {
-      return exist
-    }
-  }
-
-  return null
-}
 
 export default router

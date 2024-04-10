@@ -2,18 +2,6 @@ import {computed, ref, watchEffect} from "vue";
 import {BookDetail, BookDetailRaw, BookIndex} from "@/types/teller/books";
 import {fetchBookDetailRaw, fetchBookIndexList} from "@/api/teller.ts";
 
-export const downloadBook = async (id: number) => {
-  const res = await fetch(`http://localhost:11451/teller/book-full/${id}`)
-  const len = +(res.headers.get('content-length') ?? '0')
-  const reader = res.body.getReader()
-  while (true) {
-    const chunk = await reader.read()
-    if (chunk.done) {
-      break
-    }
-  }
-}
-
 const bookStore = new Map<number, BookDetail>()
 export const bookStoreRef = ref(bookStore)
 
@@ -54,13 +42,13 @@ export const useBookDetail = () => {
 
   const addToLib = () => {
     if (isInLib.value || book.value === null) return
-
+    const _uid = book.value.index.uid
     bookStoreRef.value.set(
-      book.value.index.uid,
+      _uid,
       {
         index: book.value.index,
-        history: 0,
-        chapters: book.value.chapters.map(it => ({
+        chapters: book.value.chapters.map((it, i) => ({
+          key: `${_uid}-${i}`,
           title: it,
           paragraph: []
         })),
@@ -76,7 +64,7 @@ export const useBookDetail = () => {
     setUid
   }
 }
-
+// todo rebuild store
 export const bookIndexListRef = ref<BookIndex[]>([])
 export const refreshBookIndexList = async () => {
   bookIndexListRef.value = await fetchBookIndexList()

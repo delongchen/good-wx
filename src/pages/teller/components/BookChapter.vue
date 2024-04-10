@@ -1,20 +1,30 @@
 <script setup lang="ts">
 import {BookChapterType} from "@/types/teller/books";
+import {ref} from "vue";
 
 const props = defineProps<{
   chapter: BookChapterType
 }>()
+
+const panelRef = ref<HTMLDivElement | null>(null)
 </script>
 
 <template>
-  <div>
-    <div>{{props.chapter.title}}</div>
-    <div>
+  <div
+    class="book-chapter"
+    ref="panelRef"
+  >
+    <div
+      class="chapter-title"
+    >{{props.chapter.title}}</div>
+    <div class="chapter-ps">
       <div
+        class="chapter-p"
         v-for="(p, pIndex) in props.chapter.paragraphs"
         :key="pIndex"
       >
         <div
+          class="chapter-line"
           v-for="(line, lineIndex) in p"
           :key="lineIndex"
         >
@@ -29,5 +39,31 @@ const props = defineProps<{
 </template>
 
 <style scoped lang="less">
+@import "@/style/preset";
 
+.book-chapter {
+  padding: 10px;
+}
+
+.chapter-title {
+  font-size: x-large;
+  font-weight: bold;
+}
+
+.chapter-p {
+  margin-top: @app-space;
+}
+
+.chapter-line {
+  margin-top: @app-space;
+  line-height: 1.7;
+  ::before {
+    content: '';
+    margin-right: 40px;
+  }
+
+  span {
+    font-size: larger;
+  }
+}
 </style>

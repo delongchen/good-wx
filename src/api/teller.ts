@@ -1,4 +1,4 @@
-import {BookChapter, BookDetailRaw, BookIndex} from "@/types/teller/books";
+import {BookChapterRaw, BookDetailRaw, BookIndex} from "@/types/teller/books";
 
 const BASE = 'http://localhost:11451/teller'
 const base = (...sub: (string | number | undefined)[]) => [BASE, ...sub].join('/')
@@ -26,4 +26,4 @@ export const fetchBookDetailRaw =
 
 export const fetchChapters =
   (id: number, index?: number) => fetch(base('chapters', id, index))
-    .then(res => res.json() as Promise<BookChapter[]>)
+    .then(res => res.json() as Promise<BookChapterRaw[]>)
