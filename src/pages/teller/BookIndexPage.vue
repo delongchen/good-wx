@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
-import {useBookDetail} from "@/store/teller/books";
-import {useRoute} from "vue-router";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
+import {useBookStore} from "@/store/teller/book";
 
-const {
-  book,
-  setUid
-} = useBookDetail()
+const store = useBookStore()
 
-const route = useRoute()
-setUid(+route.query.uid!)
 </script>
 
 <template>
@@ -18,12 +12,8 @@ setUid(+route.query.uid!)
     title="目录"
   >
     <div
-      v-if="book !== null"
+      v-if="store.activeBook !== null"
     >
-      <div
-        v-for="(chapter, index) in book.chapters"
-        :key="index"
-      >{{chapter}}</div>
     </div>
 
     <book-not-found v-else/>

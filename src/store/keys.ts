@@ -1,3 +1,4 @@
+
 const APP_KEY = 'cnmd'
 
 const createSubKey = (...keys: string[]) => {
@@ -10,5 +11,6 @@ export const resonance = {
   setting: createSubKey('resonance', 'setting')
 }
 export const teller = {
-  history: createSubKey('teller', 'history')
+  history: createSubKey('teller', 'history'),
+  bookStore: createSubKey('teller', 'book', 'store')
 }

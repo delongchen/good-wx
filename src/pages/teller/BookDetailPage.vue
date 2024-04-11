@@ -1,76 +1,69 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
-import {useRoute, useRouter} from "vue-router";
 import { DownloadIcon, TaskAddIcon, ChevronRightIcon } from 'tdesign-icons-vue-next'
-import {computed} from "vue";
-import {getCoverUrl} from "@/api/teller";
 import {fmtCharNum} from "./utils";
 import WxCard from "@/components/wx/WxCard.vue";
-import {useBookDetail} from "@/store/teller/books";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
+import { useBookStore, useDownloadBook, DownloadStatus } from "@/store/teller/book";
+import {computed} from "vue";
 
-const router = useRouter()
-const route = useRoute()
+const store = useBookStore()
 
-const {
-  isInLib,
-  addToLib,
-  book,
-  uid,
-  setUid,
-} = useBookDetail()
-
-setUid(+route.query.uid!)
-
-const coverURL = computed<string>(() => getCoverUrl(book.value?.index))
-
-const summary = computed(() => {
-  if (book.value === null) return '加载中'
-
-  const sum = book.value.index.info.sum
-  if (sum === '') return '暂无'
-
-  return sum
+const localSaved = computed(() => {
+  const activeBook = store.activeBook
+  return store.localBookMap.has(activeBook?.uid ?? 0)
 })
 
-const goBookIndex = () => {
-  router.push({ name: 'book-index', query: { uid: uid.value } })
-    .then(() => {
-      scroll({
-        left: 0,
-        top: 0,
-      })
-    })
-}
-
-const download = () => {
-}
-
-const readNow = () => {
-  if (uid.value !== 0) {
-    addToLib()
-    router.push({
-      name: 'reading',
-      query: { uid: uid.value }
-    })
+const saveLocal = () => {
+  if (
+    store.activeBook !== null &&
+    !localSaved.value
+  ) {
+    store.saveActiveBook()
   }
 }
+
+const {
+  download,
+  status,
+  len,
+  count
+} = useDownloadBook()
+
+const downloadText = computed<string>(() => {
+  switch (status.value) {
+    case DownloadStatus.Downloaded: {
+      return '已下载'
+    }
+    case DownloadStatus.Downloading: {
+      const _len = len.value
+      if (isNaN(_len) || _len === 0) return '正在下载'
+      return `${((count.value / _len) * 100) >> 0}%`
+    }
+    case DownloadStatus.Error: {
+      return '请重试'
+    }
+    case DownloadStatus.Ready: {
+      return '下载'
+    }
+  }
+})
 </script>
 
 <template>
   <teller-sub-layout>
     <div
-      v-if="book !== null"
+      v-if="store.activeBook !== null"
       style="padding: 10px;"
     >
       <div class="book-detail-header">
         <div class="header-cover">
-          <img :src="coverURL" alt="cover">
+          <img :src="store.activeBook.cover" :alt="store.activeBook.name">
         </div>
         <div class="header-text">
-          <div class="header-text-title">{{book.index.name}}</div>
-          <div class="header-text-author">{{book.index.author}}</div>
-          <div class="header-text-char">{{fmtCharNum(book.index.info.counter.char)}}字</div>
+          <div class="header-text-title">{{store.activeBook.name}}</div>
+          <div class="header-text-author">{{store.activeBook.author}}</div>
+          <div class="header-text-char">{{fmtCharNum(store.activeBook.counter.char)}}字</div>
         </div>
       </div>
 
@@ -80,13 +73,11 @@ const readNow = () => {
         class="book-detail-card"
       >
         <template #content>
-          <div>{{summary}}</div>
+          <div>{{store.activeBook.summary}}</div>
         </template>
       </wx-card>
 
       <wx-card
-        @click="goBookIndex"
-        v-if="book !== null"
         title="目录"
         title-size="larger"
         header-margin="0"
@@ -94,7 +85,7 @@ const readNow = () => {
       >
         <template #actions>
           <div style="display: flex; align-items: center; color: #6d6e6f">
-            <span>{{book.chapters.length}}章</span>
+            <span>{{store.activeBook.counter.chapter}}章</span>
             <chevron-right-icon size="larger"/>
           </div>
         </template>
@@ -106,31 +97,36 @@ const readNow = () => {
     <template #bar>
       <div
         class="book-detail-actions"
-        v-if="book !== null"
+        v-if="store.activeBook !== null"
       >
-        <div class="book-detail-action" @click="download">
+        <div
+          class="book-detail-action"
+          @click="download"
+          :style="{
+            color: status === 0 ? '#aeafaf' : ''
+          }"
+        >
           <div class="action-icon">
             <download-icon/>
           </div>
-          <div class="action-text">下载</div>
+          <div class="action-text">{{downloadText}}</div>
         </div>
         <div
           class="book-detail-action"
-          @click="addToLib"
+          @click="saveLocal"
           :style="{
-            color: isInLib ? '#aeafaf' : ''
+            color: localSaved ? '#aeafaf' : ''
           }"
         >
           <div class="action-icon">
             <task-add-icon/>
           </div>
           <div class="action-text">
-            {{isInLib ? '已添加': '加书架'}}
+            {{localSaved ? '已添加': '加书架'}}
           </div>
         </div>
         <div
           class="book-detail-actions"
-          @click="readNow"
         >
           <div>立即阅读</div>
         </div>

@@ -2,12 +2,17 @@
 import WxCard from "@/components/wx/WxCard.vue";
 import {useRouter} from "vue-router";
 import {fmtCharNum} from './utils'
-import {getCoverUrl} from '@/api/teller'
-import {refreshBookIndexList, bookIndexListRef} from '@/store/teller/books'
+import {useBookStore} from "@/store/teller/book";
 
 const router = useRouter()
+const store = useBookStore()
 
-refreshBookIndexList()
+store.refreshMetaList()
+
+const goDetail = (uid: number) => {
+  store.setActiveBook(uid)
+  router.push({name: 'book-detail'})
+}
 </script>
 
 <template>
@@ -25,13 +30,13 @@ refreshBookIndexList()
       <template #content>
         <div class="teller-shop-content">
           <div
-            v-for="item in bookIndexListRef"
+            v-for="item in store.metaList"
             class="teller-book-card"
             :key="item.uid"
-            @click="() => { router.push({name: 'book-detail', query: {uid: item.uid}}) }"
+            @click="() => { goDetail(item.uid) }"
           >
             <div class="teller-book-card-cover">
-              <img :src="getCoverUrl(item)" alt="cover">
+              <img :src="item.cover" :alt="item.name">
             </div>
             <div class="teller-book-card-text">
               <div class="teller-book-card-title">
@@ -39,14 +44,14 @@ refreshBookIndexList()
               </div>
               <div class="teller-book-card-desc">
                 {{
-                  item.info.sum.length === 0 ?
+                  item.summary.length === 0 ?
                     '暂无简介'
                     :
-                    `${item.info.sum.slice(0, 40)}...`
+                    `${item.summary.slice(0, 40)}...`
                 }}
               </div>
               <div class="teller-book-card-info">
-                {{fmtCharNum(item.info.counter.char)}}字
+                {{fmtCharNum(item.counter.char)}}字
               </div>
             </div>
           </div>

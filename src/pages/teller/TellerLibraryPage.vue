@@ -1,41 +1,29 @@
 <script setup lang="ts">
-import {getLibList} from "@/store/teller/books.ts";
-import {computed} from "vue";
-import {getCoverUrl} from "@/api/teller.ts";
-import {useRouter} from "vue-router";
-import {BookDetail} from "@/types/teller/books.ts";
+import {useBookStore} from "@/store/teller/book";
 
-const router = useRouter()
+const store = useBookStore()
 
-const goReading = (book: BookDetail) => {
-  router.push({
-    name: 'reading',
-    query: { uid: book.index.uid }
-  })
-}
-
-const bookList = computed(getLibList)
+store.loadLocalBooks()
 </script>
 
 <template>
   <div
     class="teller-library"
-    v-if="bookList.length !== 0"
+    v-if="store.localBookList.length !== 0"
   >
     <div
-      v-for="book in bookList"
-      @click="() => { goReading(book) }"
+      v-for="book in store.localBookList"
       class="teller-library-book"
-      :key="book.index.uid"
+      :key="book.uid"
     >
       <div class="book-cover">
-        <img :src="getCoverUrl(book.index)" :alt="book.index.name">
+        <img :src="book.cover" :alt="book.name">
       </div>
       <div class="book-text">
         <div>
-          <div style="font-size: large; font-weight: bold;">{{book.index.name}}</div>
+          <div style="font-size: large; font-weight: bold;">{{book.name}}</div>
           <div style="font-size: smaller; color: #6d6e6f;">
-            {{book.chapters.length}}章
+            {{book.counter.chapter}}章
           </div>
         </div>
       </div>
