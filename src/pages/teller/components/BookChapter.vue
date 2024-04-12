@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {BookChapterType} from "@/types/teller/books";
+import {BookChapterInterface} from "@/types/teller/books";
 import {ref} from "vue";
 
 const props = defineProps<{
-  chapter: BookChapterType
+  chapter: BookChapterInterface
 }>()
 
 const panelRef = ref<HTMLDivElement | null>(null)

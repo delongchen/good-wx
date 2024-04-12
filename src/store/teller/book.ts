@@ -3,8 +3,8 @@ import * as keys from '../keys'
 import {BookMetaInterface} from "@/types/teller/books";
 import {fetchBookMetaList, fetchFullBook} from "@/api/books";
 import * as req from '@/utils/requests'
-import {db} from "@/store/teller/db.ts";
 import {ref} from "vue";
+import * as db from './idb'
 
 const copy = (source: BookMetaInterface): BookMetaInterface => ({
   ...source,
@@ -31,7 +31,16 @@ export const useBookStore = defineStore(keys.teller.bookStore, {
   state: emptyBookStore,
   getters: {
     metaList: state => [...state.bookMetaMap.values()],
-    activeBook: state => state.bookMetaMap.get(state.activeBookUid) ?? null,
+    activeBook: state => {
+      const uid = state.activeBookUid
+      return (
+        state.localBookMap.get(uid)
+        ??
+        state.bookMetaMap.get(uid)
+        ??
+        null
+      )
+    },
     localBookList: state => [...state.localBookMap.values()]
   },
   actions: {
@@ -44,7 +53,7 @@ export const useBookStore = defineStore(keys.teller.bookStore, {
       })
     },
     async loadLocalBooks() {
-      const localBooks = await db.books.toArray()
+      const localBooks = await db.getAllBooks()
       for (const book of localBooks)  {
         this.localBookMap.set(book.uid, book)
       }
@@ -55,15 +64,12 @@ export const useBookStore = defineStore(keys.teller.bookStore, {
     async saveActiveBook() {
       const activeBook = this.bookMetaMap.get(this.activeBookUid)
       if (activeBook !== undefined) {
-        const exist = await db.books.get(activeBook.uid)
-        if (exist === undefined) {
-          await db.books.put(copy(activeBook))
-          this.localBookMap.set(activeBook.uid, activeBook)
-        }
+        await db.insertBook(copy(activeBook))
       }
     }
   }
 })
+
 
 export const enum DownloadStatus {
   Downloaded,
@@ -122,7 +128,7 @@ export const useDownloadBook = () => {
     const meta = result.meta as BookMetaInterface
     const chapters: {title: string, paragraphs: string[][]}[] = result.chapters
 
-    await db.chapters.bulkPut(
+    await db.insertChapters(
       chapters.map((chapter, index) => {
         return {
           key: `${meta.uid}-${index}`,
