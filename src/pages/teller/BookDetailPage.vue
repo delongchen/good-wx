@@ -4,27 +4,28 @@ import { DownloadIcon, TaskAddIcon, ChevronRightIcon } from 'tdesign-icons-vue-n
 import {fmtCharNum} from "./utils";
 import WxCard from "@/components/wx/WxCard.vue";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
-import { useBookStore, useDownloadBook, DownloadStatus } from "@/store/teller/book";
-import {computed} from "vue";
+import {useDownloadBook, DownloadStatus, selectedMeta} from "@/store/teller/book";
+import {computed, ref} from "vue";
+import {BookMetaInterface} from "@/types/teller/books.ts";
+import {fetchBookMeta} from "@/api/books.ts";
+import {useRoute} from "vue-router";
+import {hasBook, insertBook} from "@/store/teller/idb.ts";
 
-const store = useBookStore()
+const route = useRoute()
 
-const localSaved = computed(() => {
-  const activeBook = store.activeBook
-  return store.localBookMap.has(activeBook?.uid ?? 0)
+const book = ref<BookMetaInterface | null>(null)
+const localSaved = ref(false)
+
+const copyMeta = (source: BookMetaInterface): BookMetaInterface => ({
+  ...source,
+  tags: Array.from(source.tags),
+  mc: {...source.mc},
+  counter: {...source.counter},
+  latestRead: {...source.latestRead},
 })
 
-const saveLocal = () => {
-  if (
-    store.activeBook !== null &&
-    !localSaved.value
-  ) {
-    store.saveActiveBook()
-  }
-}
-
 const {
-  download,
+  download: _download,
   status,
   len,
   count
@@ -48,22 +49,56 @@ const downloadText = computed<string>(() => {
     }
   }
 })
+
+const download = () => {
+  if (book.value === null) {
+    return
+  }
+
+  _download(book.value.uid)
+}
+
+const saveToLocal = async () => {
+  if (book.value === null || localSaved.value) {
+    return
+  }
+
+  await insertBook(copyMeta(book.value))
+
+  localSaved.value = true
+}
+
+const initDetail = async () => {
+  let meta = selectedMeta.value
+  if (meta === null) {
+    meta = await fetchBookMeta(+(route.query?.uid ?? 0))
+  }
+  book.value = meta
+
+  if (meta === null) {
+    return
+  }
+
+  localSaved.value = await hasBook(meta.uid)
+}
+
+initDetail()
 </script>
 
 <template>
   <teller-sub-layout>
     <div
-      v-if="store.activeBook !== null"
+      v-if="book !== null"
       style="padding: 10px;"
     >
       <div class="book-detail-header">
         <div class="header-cover">
-          <img :src="store.activeBook.cover" :alt="store.activeBook.name">
+          <img :src="book.cover" :alt="book.name">
         </div>
         <div class="header-text">
-          <div class="header-text-title">{{store.activeBook.name}}</div>
-          <div class="header-text-author">{{store.activeBook.author}}</div>
-          <div class="header-text-char">{{fmtCharNum(store.activeBook.counter.char)}}字</div>
+          <div class="header-text-title">{{book.name}}</div>
+          <div class="header-text-author">{{book.author}}</div>
+          <div class="header-text-char">{{fmtCharNum(book.counter.char)}}字</div>
         </div>
       </div>
 
@@ -73,7 +108,7 @@ const downloadText = computed<string>(() => {
         class="book-detail-card"
       >
         <template #content>
-          <div>{{store.activeBook.summary}}</div>
+          <div>{{book.summary}}</div>
         </template>
       </wx-card>
 
@@ -85,7 +120,7 @@ const downloadText = computed<string>(() => {
       >
         <template #actions>
           <div style="display: flex; align-items: center; color: #6d6e6f">
-            <span>{{store.activeBook.counter.chapter}}章</span>
+            <span>{{book.counter.chapter}}章</span>
             <chevron-right-icon size="larger"/>
           </div>
         </template>
@@ -97,7 +132,7 @@ const downloadText = computed<string>(() => {
     <template #bar>
       <div
         class="book-detail-actions"
-        v-if="store.activeBook !== null"
+        v-if="book !== null"
       >
         <div
           class="book-detail-action"
@@ -113,7 +148,7 @@ const downloadText = computed<string>(() => {
         </div>
         <div
           class="book-detail-action"
-          @click="saveLocal"
+          @click="saveToLocal"
           :style="{
             color: localSaved ? '#aeafaf' : ''
           }"

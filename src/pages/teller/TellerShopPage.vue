@@ -2,38 +2,66 @@
 import WxCard from "@/components/wx/WxCard.vue";
 import {useRouter} from "vue-router";
 import {fmtCharNum} from './utils'
-import {useBookStore} from "@/store/teller/book";
+import {BookMetaInterface} from "@/types/teller/books.ts";
+import {ref} from "vue";
+import {fetchBookMetaList} from "@/api/books.ts";
+import {selectedMeta} from "@/store/teller/book";
+
+const metaCollectionMap = ref<Map<string, BookMetaInterface[]>>(new Map)
 
 const router = useRouter()
-const store = useBookStore()
 
-store.refreshMetaList()
-
-const goDetail = (uid: number) => {
-  store.setActiveBook(uid)
-  router.push({name: 'book-detail'})
+const goDetail = (meta: BookMetaInterface) => {
+  selectedMeta.value = meta
+  router.push({
+    name: 'book-detail',
+    query: {
+      uid: meta.uid
+    }
+  })
 }
+
+const updateMetaList = async () => {
+  const metaListRaw = await fetchBookMetaList()
+  metaListRaw.forEach(it => {
+    const collection = metaCollectionMap.value.get(it.collection)
+    if (collection === undefined) {
+      metaCollectionMap.value.set(
+        it.collection,
+        [it],
+      )
+    } else {
+      collection.push(it)
+    }
+  })
+}
+
+updateMetaList()
 </script>
 
 <template>
   <div
     class="teller-shop"
+    v-if="metaCollectionMap.size !== 0"
   >
     <wx-card
-      title="今日必读"
+      v-for="(collection, index) in [...metaCollectionMap.entries()]"
+      :key="`collection-${index}`"
+      :title="collection[0]"
       title-size="large"
       header-margin="0 0 10px 0"
       :style="{
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        marginBottom: '10px'
       }"
     >
       <template #content>
         <div class="teller-shop-content">
           <div
-            v-for="item in store.metaList"
+            v-for="item in collection[1]"
             class="teller-book-card"
             :key="item.uid"
-            @click="() => { goDetail(item.uid) }"
+            @click="() => { goDetail(item) }"
           >
             <div class="teller-book-card-cover">
               <img :src="item.cover" :alt="item.name">

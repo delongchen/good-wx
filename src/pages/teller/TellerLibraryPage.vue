@@ -1,25 +1,33 @@
 <script setup lang="ts">
-import {useBookStore} from "@/store/teller/book";
 import {useRouter} from "vue-router";
+import {ref} from "vue";
+import {BookMetaInterface} from "@/types/teller/books";
+import {getAllBooks} from "@/store/teller/idb";
 
-const store = useBookStore()
 const router = useRouter()
 
-store.loadLocalBooks()
-
 const goRead = (uid: number) => {
-  store.setActiveBook(uid)
   router.push({ name: 'reading' })
 }
+
+const localBookList = ref<BookMetaInterface[]>([])
+
+const updateLocalBookList = () => {
+  getAllBooks().then(books => {
+    localBookList.value = books
+  })
+}
+
+updateLocalBookList()
 </script>
 
 <template>
   <div
     class="teller-library"
-    v-if="store.localBookList.length !== 0"
+    v-if="localBookList.length !== 0"
   >
     <div
-      v-for="book in store.localBookList"
+      v-for="book in localBookList"
       class="teller-library-book"
       @click="() => { goRead(book.uid) }"
       :key="book.uid"

@@ -20,7 +20,8 @@ export interface BookMetaInterface {
   tags: string[]
   summary: string
   timestamp: number
-  latestRead: number
+  collection: string
+  latestRead: BookCounterInterface
   mc: Record<string, string>
   counter: BookCounterInterface
 }
