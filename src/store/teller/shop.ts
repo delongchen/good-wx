@@ -3,7 +3,6 @@ import {fetchFullBook} from "@/api/books";
 import {ref} from "vue";
 import * as db from './idb'
 
-
 export const enum DownloadStatus {
   Downloaded,
   Downloading,

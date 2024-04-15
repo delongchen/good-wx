@@ -4,12 +4,12 @@ import { DownloadIcon, TaskAddIcon, ChevronRightIcon } from 'tdesign-icons-vue-n
 import {fmtCharNum} from "./utils";
 import WxCard from "@/components/wx/WxCard.vue";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
-import {useDownloadBook, DownloadStatus, selectedMeta} from "@/store/teller/book";
+import {useDownloadBook, DownloadStatus, selectedMeta} from "@/store/teller/shop";
 import {computed, ref} from "vue";
-import {BookMetaInterface} from "@/types/teller/books.ts";
-import {fetchBookMeta} from "@/api/books.ts";
+import {BookMetaInterface} from "@/types/teller/books";
+import {fetchBookMeta} from "@/api/books";
 import {useRoute} from "vue-router";
-import {hasBook, insertBook} from "@/store/teller/idb.ts";
+import {hasBook, insertBook} from "@/store/teller/idb";
 
 const route = useRoute()
 
@@ -50,13 +50,6 @@ const downloadText = computed<string>(() => {
   }
 })
 
-const download = () => {
-  if (book.value === null) {
-    return
-  }
-
-  _download(book.value.uid)
-}
 
 const saveToLocal = async () => {
   if (book.value === null || localSaved.value) {
@@ -66,6 +59,18 @@ const saveToLocal = async () => {
   await insertBook(copyMeta(book.value))
 
   localSaved.value = true
+}
+
+const download = async () => {
+  if (book.value === null) {
+    return
+  }
+
+  if (!localSaved.value) {
+    await saveToLocal()
+  }
+
+  await _download(book.value.uid)
 }
 
 const initDetail = async () => {

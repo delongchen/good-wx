@@ -32,7 +32,7 @@ export const insertBook = async (meta: BookMetaInterface) => {
   })
 }
 
-export const getChapterByBook = async (uid: number) => {
+export const getChaptersByBook = async (uid: number) => {
   return db.transaction('r', db.chapters, async () => {
     return db.chapters
       .where('book')
@@ -44,6 +44,12 @@ export const getChapterByBook = async (uid: number) => {
 export const getChapterByKey = async (key: string) => {
   return db.transaction('r', db.chapters, async () => {
     return db.chapters.get(key)
+  })
+}
+
+export const insertChapter = async (chapter: BookChapterInterface) => {
+  return db.transaction('rw', db.chapters, async () => {
+    return db.chapters.put(chapter)
   })
 }
 
@@ -61,4 +67,14 @@ export const getBookByUid = async (uid: number) => {
 
 export const hasBook = async (uid: number) => {
   return (await getBookByUid(uid)) !== undefined
+}
+
+export const updateBook = async (meta: BookMetaInterface) => {
+  if (meta.uid === 0) return
+
+  return db.transaction('rw', db.books, async () => {
+    db.books.update(meta.uid, {
+      latestRead: {...meta.latestRead}
+    })
+  })
 }

@@ -7,7 +7,10 @@ import {getAllBooks} from "@/store/teller/idb";
 const router = useRouter()
 
 const goRead = (uid: number) => {
-  router.push({ name: 'reading' })
+  router.push({
+    name: 'reading',
+    query: { uid }
+  })
 }
 
 const localBookList = ref<BookMetaInterface[]>([])

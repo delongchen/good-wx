@@ -3,7 +3,7 @@ import {BookChapterInterface} from "@/types/teller/books";
 import {ref} from "vue";
 
 const props = defineProps<{
-  chapter: BookChapterInterface
+  chapter: BookChapterInterface | null
 }>()
 
 const panelRef = ref<HTMLDivElement | null>(null)
@@ -14,24 +14,23 @@ const panelRef = ref<HTMLDivElement | null>(null)
     class="book-chapter"
     ref="panelRef"
   >
-    <div
-      class="chapter-title"
-    >{{props.chapter.title}}</div>
-    <div class="chapter-ps">
+    <div v-if="props.chapter !== null">
       <div
-        class="chapter-p"
-        v-for="(p, pIndex) in props.chapter.paragraphs"
-        :key="pIndex"
-      >
+        class="chapter-title"
+      >{{props.chapter.title}}</div>
+      <div class="chapter-ps">
         <div
-          class="chapter-line"
-          v-for="(line, lineIndex) in p"
-          :key="lineIndex"
+          class="chapter-p"
+          v-for="(p, pIndex) in props.chapter.paragraphs"
+          :key="pIndex"
         >
-          <span
-            v-for="(chunk, chunkIndex) in line"
-            :key="chunkIndex"
-          >{{chunk.text}}</span>
+          <div
+            class="chapter-line"
+            v-for="(line, lineIndex) in p"
+            :key="lineIndex"
+          >
+            {{line}}
+          </div>
         </div>
       </div>
     </div>
@@ -43,6 +42,7 @@ const panelRef = ref<HTMLDivElement | null>(null)
 
 .book-chapter {
   padding: 10px;
+  min-height: 110vh;
 }
 
 .chapter-title {

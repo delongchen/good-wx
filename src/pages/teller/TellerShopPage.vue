@@ -2,10 +2,10 @@
 import WxCard from "@/components/wx/WxCard.vue";
 import {useRouter} from "vue-router";
 import {fmtCharNum} from './utils'
-import {BookMetaInterface} from "@/types/teller/books.ts";
+import {BookMetaInterface} from "@/types/teller/books";
 import {ref} from "vue";
 import {fetchBookMetaList} from "@/api/books.ts";
-import {selectedMeta} from "@/store/teller/book";
+import {selectedMeta} from "@/store/teller/shop";
 
 const metaCollectionMap = ref<Map<string, BookMetaInterface[]>>(new Map)
 

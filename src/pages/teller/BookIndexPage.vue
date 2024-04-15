@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
-import {useBookStore} from "@/store/teller/book";
+import {useBookStore} from "@/store/teller/shop.ts";
 
 const store = useBookStore()
 
