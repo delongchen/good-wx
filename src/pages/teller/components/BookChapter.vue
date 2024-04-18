@@ -29,7 +29,7 @@ const panelRef = ref<HTMLDivElement | null>(null)
             v-for="(line, lineIndex) in p"
             :key="lineIndex"
           >
-            {{line}}
+            <span>{{line}}</span>
           </div>
         </div>
       </div>

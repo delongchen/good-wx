@@ -46,6 +46,7 @@ import AppFooter from "@/layouts/AppFooter.vue";
   }
 
   main {
+    max-width: 100vw;
     flex: 1;
     @media @max960 {
       padding: @app-space;

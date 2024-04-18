@@ -4,6 +4,8 @@ import WxCard from "@/components/wx/WxCard.vue";
 import {ArrowRightIcon} from 'tdesign-icons-vue-next'
 import WxButton from "@/components/wx/WxButton.vue";
 import {useRouter} from "vue-router";
+import {useWxAI} from "@/core/home/ai.ts";
+import ChatMessage from "@/pages/root/ChatMessage.vue";
 
 const router = useRouter()
 const out = (path: string) => {
@@ -54,10 +56,17 @@ const cards: HomeCardType[] = [
     desc: [
       '陨落的天才',
       '外门弟子唐三',
-      '尽在其中'
+      '尽在其中',
     ]
   }
 ]
+
+const {
+  status,
+  handleSubmit,
+  chatMessages,
+  inputText,
+} = useWxAI()
 </script>
 
 <template>
@@ -74,6 +83,43 @@ const cards: HomeCardType[] = [
     </div>
     <p style="color: #8f8f8f">其实没有吴翔(</p>
   </div>
+
+  <div class="home-wx-ai">
+    <div
+      class="wx-ai-chat-panel"
+      v-if="chatMessages.length !== 0"
+      id="wxwxwx"
+    >
+      <chat-message
+        v-for="(msg, index) in chatMessages"
+        :key="index"
+        :message="msg"
+      />
+      <div
+        v-show="status !== 0"
+        class="wx-overcook"
+      >
+        吴翔过载中
+      </div>
+    </div>
+
+    <div class="wx-ai-input-panel">
+      <div style="flex: 1;">
+        <input
+          placeholder="有什么想问吴翔的"
+          type="text"
+          v-model="inputText"
+        >
+      </div>
+      <div>
+        <div
+          class="wx-ai-submit-btn"
+          @click="handleSubmit"
+        >提问</div>
+      </div>
+    </div>
+  </div>
+
   <div class="home-card-list">
     <wx-card
       class="home-card-item"
@@ -132,4 +178,50 @@ const cards: HomeCardType[] = [
   }
 }
 
+.home-wx-ai {
+  padding: 10px;
+  width: 100%;
+
+  .wx-ai-chat-panel {
+    height: 40vh;
+    background-color: @app-black-lighter;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    border-radius: 4px;
+    padding: 10px 10px 24px 10px;
+
+    .wx-overcook {
+      color: #aeafaf;
+      font-size: small;
+      text-align: center;
+    }
+  }
+
+  .wx-ai-input-panel {
+    margin-top: 10px;
+    height: 48px;
+    display: flex;
+
+    input {
+      border: 0;
+      outline-style: none;
+      font-size: larger;
+      border-radius: 4px;
+      height: 100%;
+      width: 100%;
+      padding-left: 10px;
+    }
+
+    .wx-ai-submit-btn {
+      height: 100%;
+      background-color: #42b883;
+      padding: 10px;
+      margin-left: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: larger;
+    }
+  }
+}
 </style>

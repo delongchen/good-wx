@@ -1,5 +1,5 @@
 import {BookChapterInterface, BookCounterInterface, BookMetaInterface} from "@/types/teller/books.ts";
-import {getBookByUid, getChapterByKey, insertBook, insertChapter, updateBook} from "@/store/teller/idb.ts";
+import {getBookByUid, getChapterByKey, insertBook, insertChapter} from "@/store/teller/idb.ts";
 import {fetchBookMeta, fetchChapter} from "@/api/books.ts";
 import {useRoute} from "vue-router";
 import {computed, ref} from "vue";

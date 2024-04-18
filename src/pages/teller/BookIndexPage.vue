@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
 import BookNotFound from "@/pages/teller/components/BookNotFound.vue";
-import {useBookStore} from "@/store/teller/shop.ts";
-
-const store = useBookStore()
 
 </script>
 
@@ -11,9 +8,7 @@ const store = useBookStore()
   <teller-sub-layout
     title="目录"
   >
-    <div
-      v-if="store.activeBook !== null"
-    >
+    <div v-if="true">
     </div>
 
     <book-not-found v-else/>

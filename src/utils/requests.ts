@@ -1,4 +1,4 @@
-const BaseUrl = 'http://localhost:11451'
+const BaseUrl = 'https://api.cnmd.life/wxsb'
 
 export const join = (...part: (string | number)[]) => {
   return [BaseUrl, ...part].join('/')
