@@ -16,13 +16,15 @@ const enum WxStatus {
 
 const wxWords: string[] = [
   '6',
-  '哦，牛逼',
+  '嚯，牛逼',
   '我不到啊',
   '?',
   '.',
   '对',
   '还真是',
   '加班',
+  '对的嘛',
+  '我知道的嘛',
 ]
 
 const getWxMessage = (question: string): string => {
@@ -48,7 +50,7 @@ export const useWxAI = () => {
   }
 
   const wxSay = async (question: string) => {
-    await sleep((1000 * (Math.random() * 2)) >> 0)
+    await sleep((1000 * (Math.random() * 2 + 1)) >> 0)
 
     chatMessages.value.push({
       message: getWxMessage(question),

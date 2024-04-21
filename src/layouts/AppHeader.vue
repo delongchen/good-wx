@@ -10,11 +10,14 @@ import {useRoute, useRouter} from "vue-router";
 const { getT } = useLocale()
 const t = getT('router')
 
+const showVerticalActions = ref(false)
+
 const router = useRouter()
 const route = useRoute()
 const pushPath = (path: string) => {
   router.push({path})
     .finally(() => {
+      showVerticalActions.value = false
       scroll({
         top: 0,
         left: 0,
@@ -42,7 +45,6 @@ const actionList = computed(() => {
     })
     .sort((a, b) => b.weight - a.weight)
 })
-const showVerticalActions = ref(false)
 </script>
 
 <template>
@@ -84,7 +86,14 @@ const showVerticalActions = ref(false)
         class="app-header-actions-vertical"
         v-show="showVerticalActions"
       >
-
+        <div>
+          <div
+            v-for="(action, index) in actionList"
+            :key="index"
+            style="margin-bottom: 10px; text-align: center; :hover { color: #48b883; }"
+            @click="pushPath(action.path)"
+          >{{action.title}}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -146,9 +155,10 @@ const showVerticalActions = ref(false)
     position: absolute;
     right: 0;
     top: 150%;
-    width: 200px;
-    height: 300px;
-    background-color: white;
+    width: 50vw;
+    background-color: @app-black-lighter;
+    border-radius: 4px;
+    padding: 10px;
     @media @min960 {
       display: none;
     }

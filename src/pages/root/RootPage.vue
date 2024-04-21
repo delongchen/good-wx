@@ -81,7 +81,6 @@ const {
     <div style="font-size: xxx-large">
       综合性吴翔社区
     </div>
-    <p style="color: #8f8f8f">其实没有吴翔(</p>
   </div>
 
   <div class="home-wx-ai">
@@ -109,6 +108,7 @@ const {
           placeholder="有什么想问吴翔的"
           type="text"
           v-model="inputText"
+          @keydown.enter="handleSubmit"
         >
       </div>
       <div>
