@@ -8,7 +8,7 @@ import {useDownloadBook, DownloadStatus, selectedMeta} from "@/store/teller/shop
 import {computed, ref} from "vue";
 import {BookMetaInterface} from "@/types/teller/books";
 import {fetchBookMeta} from "@/api/books";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {hasBook, insertBook} from "@/store/teller/idb";
 
 const route = useRoute()
@@ -85,6 +85,15 @@ const initDetail = async () => {
   }
 
   localSaved.value = await hasBook(meta.uid)
+}
+
+
+const router = useRouter()
+const goRead = (uid: number) => {
+  router.push({
+    name: 'reading',
+    query: { uid }
+  })
 }
 
 initDetail()
@@ -167,8 +176,16 @@ initDetail()
         </div>
         <div
           class="book-detail-actions"
+          @click="() => { goRead(book!.uid) }"
         >
-          <div>立即阅读</div>
+          <div
+            :style="{
+              border: '1px solid black',
+              padding: '10px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }"
+          >立即阅读</div>
         </div>
       </div>
     </template>

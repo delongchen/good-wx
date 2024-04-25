@@ -5,9 +5,10 @@ import {computed, ref} from "vue";
 
 const props = defineProps<{
   hideBack?: boolean,
+  headerBarColor?: string,
   title?: string,
   contentPadding?: string,
-  hideAt?: ('click' | 'scroll')[]
+  hideAt?: ('click' | 'scroll')[],
 }>()
 
 const { back } = useRouter()
@@ -40,6 +41,7 @@ const handleHide = (ev: Event) => {
   <div class="teller-sub-layout">
     <div
       class="teller-sub-layout-header"
+      :style="{ backgroundColor: props.headerBarColor ?? 'white' }"
       v-show="showHeader"
     >
       <div class="header-back" @click="back">
@@ -59,12 +61,14 @@ const handleHide = (ev: Event) => {
     >
       <slot name="default"/>
     </div>
-    <div
-      class="teller-sub-layout-bar"
-      v-show="showBar"
-    >
-      <slot name="bar" />
-    </div>
+    <transition name="bar">
+      <div
+        class="teller-sub-layout-bar"
+        v-show="showBar"
+      >
+        <slot name="bar" />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -73,7 +77,6 @@ const handleHide = (ev: Event) => {
 @bottom-space: 64px;
 
 .teller-sub-layout-header {
-  background-color: white;
   height: @top-space;
   position: fixed;
   padding: 0 10px 0 10px;
@@ -96,7 +99,6 @@ const handleHide = (ev: Event) => {
 }
 
 .teller-sub-layout-bar {
-  background-color: white;
   height: @bottom-space;
   position: fixed;
   left: 0;

@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import {BookChapterInterface} from "@/types/teller/books";
-import {ref} from "vue";
+import {computed, ref} from "vue";
+import {useReadingSetting} from "@/store/teller/reading.ts";
 
 const props = defineProps<{
   chapter: BookChapterInterface | null
 }>()
 
 const panelRef = ref<HTMLDivElement | null>(null)
+const { fontSize } = useReadingSetting()
+
+const computedFontSize = computed(() => {
+  return {
+    chapter: `${fontSize.value}px`,
+    title: `${fontSize.value + 2}px`
+  }
+})
 </script>
 
 <template>
@@ -17,6 +26,7 @@ const panelRef = ref<HTMLDivElement | null>(null)
     <div v-if="props.chapter !== null">
       <div
         class="chapter-title"
+        :style="{ fontSize: computedFontSize.title }"
       >{{props.chapter.title}}</div>
       <div class="chapter-ps">
         <div
@@ -29,7 +39,11 @@ const panelRef = ref<HTMLDivElement | null>(null)
             v-for="(line, lineIndex) in p"
             :key="lineIndex"
           >
-            <span>{{line}}</span>
+            <span
+              :style="{
+                fontSize: computedFontSize.chapter
+              }"
+            >{{line}}</span>
           </div>
         </div>
       </div>
@@ -46,7 +60,6 @@ const panelRef = ref<HTMLDivElement | null>(null)
 }
 
 .chapter-title {
-  font-size: x-large;
   font-weight: bold;
 }
 
@@ -60,10 +73,6 @@ const panelRef = ref<HTMLDivElement | null>(null)
   ::before {
     content: '';
     margin-right: 40px;
-  }
-
-  span {
-    font-size: larger;
   }
 }
 </style>

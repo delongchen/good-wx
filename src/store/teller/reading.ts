@@ -3,6 +3,9 @@ import {getBookByUid, getChapterByKey, insertBook, insertChapter} from "@/store/
 import {fetchBookMeta, fetchChapter} from "@/api/books.ts";
 import {useRoute} from "vue-router";
 import {computed, ref} from "vue";
+import {useLocalStorage} from "@vueuse/core";
+import * as keys from '@/store/keys'
+import {defaultTheme, ReadingThemeInterface, themeMap} from "@/store/teller/themes.ts";
 
 const EmptyCounter: BookCounterInterface = {
   chapter: 0,
@@ -108,5 +111,49 @@ export const useReading = () => {
     hasPrev,
     init,
     nextChapter,
+  }
+}
+
+interface ReadingSettingInterface {
+  fontSize: number
+  themeName: string
+}
+
+const initSetting = (): ReadingSettingInterface => {
+  return {
+    fontSize: 22,
+    themeName: 'light'
+  }
+}
+
+const localSetting = useLocalStorage(
+  keys.teller.readingSetting,
+  initSetting,
+  {
+    mergeDefaults: true
+  }
+)
+
+export const useReadingSetting = () => {
+  const setFontSize = (size: number) => {
+    localSetting.value.fontSize = size
+  }
+
+  const fontSize = computed(() => localSetting.value.fontSize)
+
+  const setThemeName = (theme: string) => {
+    localSetting.value.themeName = theme
+  }
+
+  const theme = computed<ReadingThemeInterface>(() => {
+    const exist = themeMap.get(localSetting.value.themeName)
+    return exist ?? defaultTheme
+  })
+
+  return {
+    setFontSize,
+    setThemeName,
+    fontSize,
+    theme,
   }
 }

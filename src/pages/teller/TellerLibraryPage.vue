@@ -5,7 +5,6 @@ import {BookMetaInterface} from "@/types/teller/books";
 import {getAllBooks} from "@/store/teller/idb";
 
 const router = useRouter()
-
 const goRead = (uid: number) => {
   router.push({
     name: 'reading',

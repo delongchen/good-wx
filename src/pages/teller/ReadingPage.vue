@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
-import {useReading} from "@/store/teller/reading.ts";
+import {useReading, useReadingSetting} from "@/store/teller/reading.ts";
 import BookChapter from "@/pages/teller/components/BookChapter.vue";
 import {
   BulletpointIcon,
@@ -8,6 +8,9 @@ import {
   SettingIcon,
   Code1Icon,
 } from 'tdesign-icons-vue-next'
+import {reactive} from "vue";
+import ReadingSettings from "@/pages/teller/components/ReadingSettings.vue";
+import {ColorHelper} from "@/utils/colors.ts";
 
 const {
   book,
@@ -24,14 +27,27 @@ const addNextChapter = (ev: Event) => {
   ev.stopPropagation()
   nextChapter()
 }
+
+const showStatus = reactive<Record<string, boolean>>({
+  readingSetting: false,
+})
+
+const {
+  theme
+} = useReadingSetting()
 </script>
 
 <template>
   <teller-sub-layout
     content-padding="0"
     :hide-at="['scroll', 'click']"
+    :header-bar-color="theme.panel"
+    :style="{ color: theme.font }"
   >
-    <div v-if="book !== null">
+    <div
+      v-if="book !== null"
+      :style="{ backgroundColor: theme.bg }"
+    >
       <div class="reading-header">
         <div class="book-header-cover">
           <img :src="book.cover" :alt="book.name">
@@ -75,20 +91,51 @@ const addNextChapter = (ev: Event) => {
     </div>
 
     <template #bar>
-      <div class="reading-tab-bar">
-        <div class="reading-tab-bar-item">
+      <div
+        class="reading-tab-bar"
+        :style="{ backgroundColor: theme.panel }"
+      >
+        <!-- index -->
+        <div
+          class="reading-tab-bar-item"
+        >
           <div style="font-size: x-large;"><bulletpoint-icon/></div>
           <div style="font-size: small;">目录</div>
         </div>
-        <div class="reading-tab-bar-item">
+
+        <!-- processing -->
+        <div
+          class="reading-tab-bar-item"
+        >
           <div style="font-size: x-large;"><focus-icon/></div>
           <div style="font-size: small;">进度</div>
         </div>
-        <div class="reading-tab-bar-item">
-          <div style="font-size: x-large;"><setting-icon/></div>
-          <div style="font-size: small;">设置</div>
+
+        <!-- setting -->
+        <div>
+          <div
+            class="reading-tab-bar-item"
+            @click="showStatus.readingSetting = !showStatus.readingSetting"
+          >
+            <div style="font-size: x-large;"><setting-icon/></div>
+            <div style="font-size: small;">设置</div>
+          </div>
+          <div
+            class="reading-setting-content"
+            :style="{
+              backgroundColor: theme.panel,
+              borderTop: `1px solid ${ColorHelper.fromHex(theme.panel).addRGB(-10).toHex()}`
+            }"
+            v-show="showStatus.readingSetting"
+          >
+            <reading-settings/>
+          </div>
         </div>
-        <div class="reading-tab-bar-item">
+
+        <!-- rules -->
+        <div
+          class="reading-tab-bar-item"
+        >
           <div style="font-size: x-large;"><code1-icon/></div>
           <div style="font-size: small;">规则</div>
         </div>
@@ -98,6 +145,8 @@ const addNextChapter = (ev: Event) => {
 </template>
 
 <style scoped lang="less">
+@import "@/style/preset";
+
 .reading-header {
   min-height: 105vh;
   display: flex;
@@ -133,6 +182,7 @@ const addNextChapter = (ev: Event) => {
 
 .reading-tab-bar {
   display: flex;
+  position: relative;
   padding: 10px 36px 10px 36px;
   height: 100%;
   align-items: center;
@@ -143,5 +193,14 @@ const addNextChapter = (ev: Event) => {
     flex-direction: column;
     align-items: center;
   }
+}
+
+.reading-setting-content {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  right: 0;
+  padding: @app-space;
+  border-radius: @app-space @app-space 0 0;
 }
 </style>

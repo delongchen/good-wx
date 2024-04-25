@@ -12,5 +12,6 @@ export const resonance = {
 }
 export const teller = {
   history: createSubKey('teller', 'history'),
-  bookStore: createSubKey('teller', 'book', 'store')
+  bookStore: createSubKey('teller', 'book', 'store'),
+  readingSetting: createSubKey('teller', 'reading', 'setting')
 }

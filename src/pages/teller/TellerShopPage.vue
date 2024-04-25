@@ -87,6 +87,13 @@ updateMetaList()
       </template>
     </wx-card>
   </div>
+
+  <div
+    v-else
+    class="teller-shop-loading"
+  >
+    <div>少女加载中...</div>
+  </div>
 </template>
 
 <style scoped lang="less">
@@ -138,5 +145,14 @@ updateMetaList()
       color: #6d6e6f;
     }
   }
+}
+
+.teller-shop-loading {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: x-large;
 }
 </style>
