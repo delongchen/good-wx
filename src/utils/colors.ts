@@ -2,6 +2,9 @@
 // #RGBA
 // #RRGGBB
 // #RRGGBBAA
+
+import {basisOf, moduleOf} from "@/utils/vector.ts";
+
 const fmtRGBHex = (hex: string): string | null => {
   if (!hex.startsWith('#')) return null
 
@@ -27,22 +30,47 @@ const fmtRGBHex = (hex: string): string | null => {
 }
 
 const fmtColorValue = (value: number) => {
-  value >>= 0
+  value = Math.round(value)
   if (value < 0) return 0
   if (value > 255) return 255
   return value
 }
 
-type RGB = 'red' | 'green' | 'blue'
-type RGBA = RGB | 'alpha'
+interface ColorMeta {
+  norm: number
+  basis: [number, number, number]
+  maxNorm: number
+}
 
 export class ColorHelper {
+  private meta!: ColorMeta
+
   constructor(
     private red: number = 255,
     private green: number = 255,
     private blue: number = 255,
     private alpha: number = 255,
-  ) {}
+  ) {
+    this.updateMeta()
+  }
+
+  private updateMetaNorm() {
+    this.meta.norm = moduleOf([this.red, this.green, this.blue])
+  }
+
+  private updateMeta() {
+    const {red, green, blue} = this
+    const vec = [red, green, blue]
+    const norm = moduleOf(vec)
+    const basis = basisOf(vec, norm) as [number, number, number]
+    const maxNorm = 255 / Math.max(...basis)
+
+    this.meta = {
+      norm,
+      basis,
+      maxNorm,
+    }
+  }
 
   static fromHex(raw: string): ColorHelper {
     const hex = fmtRGBHex(raw)
@@ -58,11 +86,6 @@ export class ColorHelper {
     }
 
     return new ColorHelper(red, green, blue, alpha)
-  }
-
-  setValue(key: RGBA, value: number): ColorHelper {
-    this[key] = fmtColorValue(value)
-    return this
   }
 
   clone() {
@@ -81,14 +104,50 @@ export class ColorHelper {
       .join('')
   }
 
-  add(key: RGBA, value: number) {
-    return this.setValue(key, this[key] + value)
+  linearAdd(increment: number): ColorHelper {
+    const { meta: {basis} } = this
+    this.red = fmtColorValue(this.red + basis[0] * increment)
+    this.green = fmtColorValue(this.green + basis[1] * increment)
+    this.blue = fmtColorValue(this.blue + basis[2] * increment)
+    this.updateMetaNorm()
+    return this
   }
 
-  addRGB(value: number): ColorHelper {
-    for (const key of ['red', 'green', 'blue'] as RGB[]) {
-      this.add(key, value)
-    }
-    return this
+  lighter(percentage: number = 10): ColorHelper {
+    return this.linearAdd((percentage / 100) * this.meta.maxNorm)
+  }
+
+  darker(percentage: number = 5): ColorHelper {
+    return this.linearAdd(-(percentage / 100) * this.meta.maxNorm)
+  }
+
+  static between(a: string | ColorHelper, b: string | ColorHelper) {
+    if (typeof a === 'string') a = ColorHelper.fromHex(a)
+    if (typeof b === 'string') b = ColorHelper.fromHex(b)
+
+    return new ColorHelper(
+      Math.round((a.red + b.red) / 2),
+      Math.round((a.green + b.green) / 2),
+      Math.round((a.blue + b.blue) / 2),
+    )
+  }
+
+  static basisBetween(a: string | ColorHelper, b: string | ColorHelper) {
+    if (typeof a === 'string') a = ColorHelper.fromHex(a)
+    if (typeof b === 'string') b = ColorHelper.fromHex(b)
+
+    const c_basis: [number, number, number] = [
+      (a.meta.basis[0] + b.meta.basis[0]) / 2,
+      (a.meta.basis[1] + b.meta.basis[1]) / 2,
+      (a.meta.basis[2] + b.meta.basis[2]) / 2,
+    ]
+
+    const c_norm = (a.meta.norm + b.meta.norm) / 2
+
+    return new ColorHelper(
+      Math.round(c_basis[0] * c_norm),
+      Math.round(c_basis[1] * c_norm),
+      Math.round(c_basis[2] * c_norm),
+    )
   }
 }

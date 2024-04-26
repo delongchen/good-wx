@@ -100,7 +100,10 @@ initDetail()
 </script>
 
 <template>
-  <teller-sub-layout>
+  <teller-sub-layout
+    show-header
+    show-footer
+  >
     <div
       v-if="book !== null"
       style="padding: 10px;"
@@ -232,6 +235,7 @@ initDetail()
   display: flex;
   justify-content: space-around;
   align-items: center;
+  background-color: white;
 
   .book-detail-action {
     display: flex;

@@ -8,45 +8,139 @@ import {
   SettingIcon,
   Code1Icon,
 } from 'tdesign-icons-vue-next'
-import {reactive} from "vue";
+import {computed, ref} from "vue";
 import ReadingSettings from "@/pages/teller/components/ReadingSettings.vue";
 import {ColorHelper} from "@/utils/colors.ts";
+import WxTabBar from "@/components/wx/WxTabBar/WxTabBar.vue";
+import WxTabBarItem from "@/components/wx/WxTabBar/WxTabBarItem.vue";
+import { useBattery, useNow } from '@vueuse/core'
 
 const {
   book,
   chapterList,
-  hasNext,
-  hasPrev,
   init,
-  nextChapter,
 } = useReading()
 
 init()
 
-const addNextChapter = (ev: Event) => {
-  ev.stopPropagation()
-  nextChapter()
-}
-
-const showStatus = reactive<Record<string, boolean>>({
-  readingSetting: false,
-})
+const { theme } = useReadingSetting()
 
 const {
-  theme
-} = useReadingSetting()
+  isSupported,
+  level,
+} = useBattery()
+
+const now = useNow()
+const fmtedNow = computed(() => {
+  const date = now.value
+  return `${date.getHours()}:${date.getMinutes()}`
+})
+
+const borderColor = computed(() => {
+  return ColorHelper
+    .fromHex(theme.value.panel)
+    .darker()
+    .toHex()
+})
+
+const infoBarFontColor = computed(() => {
+  return ColorHelper
+    .basisBetween(theme.value.font, theme.value.bg)
+    .toHex()
+})
+
+const curTabBarItem = ref('')
+const showHeader = ref(true)
+const showFooter = ref(true)
+
+const hideTools = () => {
+  curTabBarItem.value = ''
+  showHeader.value = false
+  showFooter.value = false
+}
+
+const showTools = () => {
+  curTabBarItem.value = ''
+  showHeader.value = true
+  showFooter.value = true
+}
+
+const handlePanelScroll = () => {
+  hideTools()
+}
+
+const handlePanelClick = () => {
+  if (showFooter.value) {
+    hideTools()
+  } else {
+    showTools()
+  }
+}
+
+const handleTabBarChange = (activeValue: string | number) => {
+  if (activeValue !== curTabBarItem.value) {
+    curTabBarItem.value = activeValue as string
+  } else {
+    curTabBarItem.value = ''
+  }
+}
+
+const tabBarItems = [
+  {
+    label: '目录',
+    value: 'indexes',
+    icon: BulletpointIcon,
+  },
+  {
+    label: '进度',
+    value: 'schedule',
+    icon: FocusIcon,
+  },
+  {
+    label: '设置',
+    value: 'settings',
+    icon: SettingIcon,
+  },
+  {
+    label: '规则',
+    value: 'rules',
+    icon: Code1Icon,
+  },
+]
 </script>
 
 <template>
   <teller-sub-layout
     content-padding="0"
-    :hide-at="['scroll', 'click']"
     :header-bar-color="theme.panel"
     :style="{ color: theme.font }"
+    :show-header="showHeader"
+    :show-footer="showFooter"
   >
     <div
-      v-if="book !== null"
+      class="reading-info-bar"
+      :style="{
+        backgroundColor: theme.bg,
+        color: infoBarFontColor,
+      }"
+    >
+      <div>第一章 斗之气九段</div>
+      <div class="device-info">
+        <div
+          v-show="isSupported"
+        >{{level}}</div>
+        <div
+          style="margin-left: 5px;"
+        >{{fmtedNow}}</div>
+      </div>
+    </div>
+
+    <div
+      v-if="book.uid !== 0"
+      class="teller-reading-panel"
       :style="{ backgroundColor: theme.bg }"
+      @scroll="handlePanelScroll"
+      @click="handlePanelClick"
     >
       <div class="reading-header">
         <div class="book-header-cover">
@@ -57,16 +151,8 @@ const {
           <div>{{book.author}}</div>
         </div>
       </div>
+
       <div>
-        <div
-          v-if="hasPrev"
-          class="chapter-trigger-panel"
-        >
-          <div class="trigger-area"></div>
-          <div class="trigger-text">
-            <div>上一章</div>
-          </div>
-        </div>
         <div>
           <book-chapter
             v-for="chapter in chapterList"
@@ -74,78 +160,78 @@ const {
             :chapter="chapter"
           />
         </div>
-        <div
-          v-if="hasNext"
-          class="chapter-trigger-panel"
-        >
-          <div class="trigger-text">
-            <div @click="addNextChapter">下一章</div>
-          </div>
-          <div class="trigger-area"></div>
-        </div>
       </div>
     </div>
 
-    <div v-else>
-
+    <div
+      v-else
+      :style="{ backgroundColor: theme.bg }"
+      class="book-not-found"
+    >
+      <div>迷路惹</div>
     </div>
 
     <template #bar>
-      <div
-        class="reading-tab-bar"
+      <wx-tab-bar
         :style="{ backgroundColor: theme.panel }"
+        v-model="curTabBarItem"
+        :active-color="theme.highlight"
+        @change="handleTabBarChange"
       >
-        <!-- index -->
-        <div
-          class="reading-tab-bar-item"
+        <wx-tab-bar-item
+          v-for="item in tabBarItems"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
         >
-          <div style="font-size: x-large;"><bulletpoint-icon/></div>
-          <div style="font-size: small;">目录</div>
-        </div>
-
-        <!-- processing -->
-        <div
-          class="reading-tab-bar-item"
-        >
-          <div style="font-size: x-large;"><focus-icon/></div>
-          <div style="font-size: small;">进度</div>
-        </div>
-
-        <!-- setting -->
-        <div>
-          <div
-            class="reading-tab-bar-item"
-            @click="showStatus.readingSetting = !showStatus.readingSetting"
-          >
-            <div style="font-size: x-large;"><setting-icon/></div>
-            <div style="font-size: small;">设置</div>
-          </div>
-          <div
-            class="reading-setting-content"
-            :style="{
-              backgroundColor: theme.panel,
-              borderTop: `1px solid ${ColorHelper.fromHex(theme.panel).addRGB(-10).toHex()}`
-            }"
-            v-show="showStatus.readingSetting"
-          >
-            <reading-settings/>
-          </div>
-        </div>
-
-        <!-- rules -->
-        <div
-          class="reading-tab-bar-item"
-        >
-          <div style="font-size: x-large;"><code1-icon/></div>
-          <div style="font-size: small;">规则</div>
-        </div>
-      </div>
+          <template #icon>
+            <component :is="item.icon"/>
+          </template>
+        </wx-tab-bar-item>
+      </wx-tab-bar>
     </template>
   </teller-sub-layout>
+
+  <div
+    class="tab-bar-external-panel"
+    v-show="curTabBarItem !== ''"
+    :style="{
+      backgroundColor: theme.panel,
+      color: theme.font,
+      borderTop: `1px solid ${borderColor}`,
+      borderBottom: `1px solid ${borderColor}`,
+    }"
+  >
+    <reading-settings v-if="curTabBarItem === 'settings'"/>
+  </div>
 </template>
 
 <style scoped lang="less">
 @import "@/style/preset";
+
+.teller-reading-panel {
+  height: 100vh;
+  overflow: scroll;
+  scrollbar-width: none;
+}
+
+.reading-info-bar {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  font-size: smaller;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .device-info {
+    display: flex;
+  }
+}
 
 .reading-header {
   min-height: 105vh;
@@ -162,45 +248,24 @@ const {
   align-items: center;
 }
 
-.chapter-trigger-panel {
-  .trigger-text {
-    height: 5vh;
-    position: relative;
-    div {
-      padding: 10px;
-      border: 1px solid black;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
-  .trigger-area {
-    height: 5vh;
-  }
-}
-
-.reading-tab-bar {
+.book-not-found {
+  height: 100vh;
   display: flex;
-  position: relative;
-  padding: 10px 36px 10px 36px;
-  height: 100%;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-
-  .reading-tab-bar-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  justify-content: center;
+  font-size: xxx-large;
 }
 
-.reading-setting-content {
-  position: absolute;
+.tab-bar-external-panel {
+  position: fixed;
   left: 0;
-  bottom: 100%;
   right: 0;
+  bottom: 64px;
   padding: @app-space;
+  max-height: 80vh;
+  overflow: scroll;
+  scrollbar-width: none;
   border-radius: @app-space @app-space 0 0;
 }
 </style>

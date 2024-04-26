@@ -61,6 +61,7 @@ const computedFontSize = computed(() => {
 
 .chapter-title {
   font-weight: bold;
+  margin-bottom: 2 * @app-space;
 }
 
 .chapter-p {

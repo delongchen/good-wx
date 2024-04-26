@@ -25,9 +25,9 @@ const addFontSize = () => {
   if (canFontSizeAdd.value)
     setFontSize(fontSize.value + 2)
 }
-const panelGrayColor = computed(() => {
+const panelDarkerColor = computed(() => {
   return ColorHelper.fromHex(theme.value.panel)
-    .addRGB(-10)
+    .darker()
     .toHex()
 })
 </script>
@@ -40,8 +40,9 @@ const panelGrayColor = computed(() => {
       <div>字号</div>
       <div
         @click="reduceFontSize"
-        class="font-size-setting-btn"
-        :style="{ backgroundColor: panelGrayColor }"
+        class="setting-btn"
+        style="font-weight: bold;"
+        :style="{ backgroundColor: panelDarkerColor }"
         :class="{
           'font-size-setting-btn-disable': !canFontSizeReduce
         }"
@@ -49,10 +50,11 @@ const panelGrayColor = computed(() => {
       <div>{{fontSize}}</div>
       <div
         @click="addFontSize"
-        class="font-size-setting-btn"
-        :style="{ backgroundColor: panelGrayColor }"
+        class="setting-btn"
+        style="font-weight: bold;"
+        :style="{ backgroundColor: panelDarkerColor }"
         :class="{
-          'font-size-setting-btn-disable': !canFontSizeAdd
+          'setting-btn-disable': !canFontSizeAdd
         }"
       >A+</div>
     </div>
@@ -71,24 +73,40 @@ const panelGrayColor = computed(() => {
         class="preset-color-item"
       ></div>
     </div>
+
+    <div
+      class="more-setting"
+      :style="{
+        borderTop: `1px solid ${panelDarkerColor}`
+      }"
+    >
+      <div
+        class="setting-btn"
+        :style="{ backgroundColor: panelDarkerColor }"
+      >开启护眼</div>
+      <div
+        class="setting-btn"
+        :style="{ backgroundColor: panelDarkerColor }"
+      >更多设置</div>
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
 @import "@/style/preset";
+
 .font-size-setting {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.font-size-setting-btn {
+.setting-btn {
   padding: 10px @app-space*1.5 10px @app-space*1.5;
   border-radius: @app-space;
-  font-weight: bold;
 }
 
-.font-size-setting-btn-disable {
+.setting-btn-disable {
   color: #aeafaf;
 }
 
@@ -105,5 +123,12 @@ const panelGrayColor = computed(() => {
     height: 48px;
     border-radius: 24px;
   }
+}
+
+.more-setting {
+  padding: @app-space 10px 0 10px;
+  display: flex;
+  font-size: large;
+  justify-content: space-around;
 }
 </style>

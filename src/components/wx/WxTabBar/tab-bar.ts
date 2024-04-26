@@ -4,6 +4,7 @@ import {findChildByName} from "@/utils/vnode.ts";
 export interface TabBarProps {
   fixed?: boolean
   value?: number | string
+  activeColor?: string
 }
 
 interface TabBarInjection {
@@ -16,12 +17,15 @@ interface TabBarInjection {
 
 const TabBarSymbol = Symbol('wx-tab-bar')
 
-export const tabBarProvide = (tabBarProps: TabBarProps) => {
+export const tabBarProvide = (
+  tabBarProps: TabBarProps,
+  activeValue: Ref<string | number>,
+  onChange: (value: string | number) => void
+) => {
   const slots = useSlots()
 
-  const activeValue = ref<string | number>('')
   const updateChild = (currentValue: number | string) => {
-    activeValue.value = currentValue
+    onChange(currentValue)
   }
 
   const itemCount = computed(() => {
