@@ -12,6 +12,14 @@ export interface BookChapterInterface {
   paragraphs: string[][]
 }
 
+export interface BookReadingRecord {
+  uid: number
+  title: string
+  chapter: number
+  paragraph: number
+  line: number
+}
+
 export interface BookMetaInterface {
   cover?: string
   name: string
@@ -21,7 +29,6 @@ export interface BookMetaInterface {
   summary: string
   timestamp: number
   collection: string
-  latestRead: BookCounterInterface
   mc: Record<string, string>
   counter: BookCounterInterface
 }

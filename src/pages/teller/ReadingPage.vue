@@ -1,39 +1,35 @@
 <script setup lang="ts">
 import TellerSubLayout from "@/pages/teller/TellerSubLayout.vue";
-import {useReading, useReadingSetting} from "@/store/teller/reading.ts";
-import BookChapter from "@/pages/teller/components/BookChapter.vue";
-import {
-  BulletpointIcon,
-  FocusIcon,
-  SettingIcon,
-  Code1Icon,
-} from 'tdesign-icons-vue-next'
+import {BookStatus, useBook, useReadingSetting} from "@/store/teller/reading.ts";
+import {BulletpointIcon, Code1Icon, FocusIcon, SettingIcon,} from 'tdesign-icons-vue-next'
 import {computed, ref} from "vue";
 import ReadingSettings from "@/pages/teller/components/ReadingSettings.vue";
 import {ColorHelper} from "@/utils/colors.ts";
 import WxTabBar from "@/components/wx/WxTabBar/WxTabBar.vue";
 import WxTabBarItem from "@/components/wx/WxTabBar/WxTabBarItem.vue";
-import { useBattery, useNow } from '@vueuse/core'
+import {useIntersectionObserver, useNow} from '@vueuse/core'
+import WxBattery from "@/components/wx/WxBattery.vue";
+import {useRoute} from "vue-router";
+import TellerChapter from "@/pages/teller/components/TellerChapter.vue";
 
+const route = useRoute()
 const {
   book,
+  status: bookStatus,
+  record,
   chapterList,
-  init,
-} = useReading()
-
-init()
+  handleNextChapter,
+  handleChapterPosition,
+} = useBook(() => +(route.query?.uid ?? 0))
 
 const { theme } = useReadingSetting()
-
-const {
-  isSupported,
-  level,
-} = useBattery()
 
 const now = useNow()
 const fmtedNow = computed(() => {
   const date = now.value
-  return `${date.getHours()}:${date.getMinutes()}`
+  const h = date.getHours()
+  const m = date.getMinutes()
+  return `${h < 10 ? '0' + h : h}:${m < 10 ? '0' + m : m}`
 })
 
 const borderColor = computed(() => {
@@ -107,6 +103,16 @@ const tabBarItems = [
     icon: Code1Icon,
   },
 ]
+
+const nextChapterTriggerRef = ref<HTMLDivElement | null>(null)
+const nextChapterTrigger = useIntersectionObserver(
+  nextChapterTriggerRef,
+  ([{ isIntersecting }]) => {
+    if (isIntersecting) {
+      handleNextChapter()
+    }
+  }
+)
 </script>
 
 <template>
@@ -119,16 +125,15 @@ const tabBarItems = [
   >
     <div
       class="reading-info-bar"
+      v-if="record.chapter !== -1"
       :style="{
         backgroundColor: theme.bg,
         color: infoBarFontColor,
       }"
     >
-      <div>第一章 斗之气九段</div>
+      <div class="chapter-info">{{record.title}}</div>
       <div class="device-info">
-        <div
-          v-show="isSupported"
-        >{{level}}</div>
+        <wx-battery :color="infoBarFontColor"/>
         <div
           style="margin-left: 5px;"
         >{{fmtedNow}}</div>
@@ -136,13 +141,16 @@ const tabBarItems = [
     </div>
 
     <div
-      v-if="book.uid !== 0"
+      v-if="bookStatus === BookStatus.Ready"
       class="teller-reading-panel"
       :style="{ backgroundColor: theme.bg }"
       @scroll="handlePanelScroll"
       @click="handlePanelClick"
     >
-      <div class="reading-header">
+      <div
+        class="reading-header"
+        v-if="record.chapter === -1"
+      >
         <div class="book-header-cover">
           <img :src="book.cover" :alt="book.name">
         </div>
@@ -153,18 +161,34 @@ const tabBarItems = [
       </div>
 
       <div>
+        <div
+          class="chapter-trigger"
+          v-if="record.chapter > 0"
+        ></div>
+
         <div>
-          <book-chapter
-            v-for="chapter in chapterList"
-            :key="chapter.key"
-            :chapter="chapter"
+          <teller-chapter
+            v-for="chapterKey in chapterList"
+            :key="chapterKey"
+            @position-change="handleChapterPosition"
+            :chapter-key="chapterKey"
           />
         </div>
+
+        <div
+          v-if="nextChapterTrigger.isSupported"
+          class="chapter-trigger"
+          ref="nextChapterTriggerRef"
+        ></div>
       </div>
     </div>
 
     <div
-      v-else
+      v-else-if="bookStatus === BookStatus.Loading"
+    >loading</div>
+
+    <div
+      v-else-if="bookStatus === BookStatus.NotFound"
       :style="{ backgroundColor: theme.bg }"
       class="book-not-found"
     >
@@ -228,8 +252,14 @@ const tabBarItems = [
   align-items: center;
   justify-content: space-between;
 
+  .chapter-info {
+    width: 40vh;
+    overflow: hidden;
+  }
+
   .device-info {
     display: flex;
+    align-items: center;
   }
 }
 
@@ -239,6 +269,10 @@ const tabBarItems = [
   flex-direction: column;
   align-items: center;
   padding-top: 20vh;
+}
+
+.chapter-trigger {
+  height: 10vh;
 }
 
 .book-header-text {

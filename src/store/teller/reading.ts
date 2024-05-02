@@ -1,41 +1,31 @@
-import {BookChapterInterface, BookCounterInterface, BookMetaInterface} from "@/types/teller/books.ts";
-import {getBookByUid, getChapterByKey, insertBook, insertChapter} from "@/store/teller/idb.ts";
+import {
+  BookChapterInterface,
+  BookMetaInterface,
+  BookReadingRecord
+} from "@/types/teller/books.ts";
+import {
+  getBookByUid,
+  getChapterByKey,
+  getRecordByUid,
+  insertBook,
+  insertChapter,
+  insertRecord, updateRecord
+} from "@/store/teller/idb.ts";
 import {fetchBookMeta, fetchChapter} from "@/api/books.ts";
-import {useRoute} from "vue-router";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import {useLocalStorage} from "@vueuse/core";
 import * as keys from '@/store/keys'
 import {defaultTheme, ReadingThemeInterface, themeMap} from "@/store/teller/themes.ts";
+import {EmptyBookMeta, EmptyChapter, EmptyReadingRecord} from "@/store/teller/empty.ts";
+import {ElementPosition} from "@/utils/el.ts";
 
-const EmptyCounter: BookCounterInterface = {
-  chapter: 0,
-  paragraph: 0,
-  line: 0,
-  char: 0,
-}
-
-const EmptyBookMeta: BookMetaInterface = {
-  name: '',
-  author: '',
-  uid: 0,
-  tags: [],
-  summary: '',
-  timestamp: 0,
-  collection: '',
-  mc: {},
-  counter: EmptyCounter,
-  latestRead: EmptyCounter
-}
-
-const getAndCacheChapter = async (book: number, index: number): Promise<BookChapterInterface | null> => {
-  if (book === 0 || index < 0) return null
-
-  const local = await getChapterByKey(`${book}-${index}`)
+const getAndCacheChapter = async (chapterKey: string): Promise<BookChapterInterface | null> => {
+  const local = await getChapterByKey(chapterKey)
   if (local !== undefined) {
     return local
   }
 
-  const remote = await fetchChapter(book, index)
+  const remote = await fetchChapter(chapterKey)
   if (remote !== null) {
     await insertChapter(remote)
     return remote
@@ -44,73 +34,119 @@ const getAndCacheChapter = async (book: number, index: number): Promise<BookChap
   return null
 }
 
-export const useReading = () => {
-  const route = useRoute()
-  const uid = computed(() => +(route.query?.uid ?? 0))
+export const enum BookStatus {
+  Ready,
+  Loading,
+  NotFound,
+}
+
+export const useBook = (uidGetter: () => number) => {
   const book = ref<BookMetaInterface>(EmptyBookMeta)
-  const chapterList = ref<BookChapterInterface[]>([])
+  const status = ref<BookStatus>(BookStatus.NotFound)
+  const record = ref<BookReadingRecord>(EmptyReadingRecord)
+  const chapterList = ref<string[]>([])
 
-  const hasNext = computed<boolean>(() => {
-    if (book.value.uid === 0) return false
-
-    const history = book.value.latestRead
-    const counter = book.value.counter
-
-    return history.chapter < counter.chapter - 1
-  })
-
-  const hasPrev = computed<boolean>(() => {
-    return book.value.uid !== 0 && book.value.latestRead.chapter >= 1
-  })
-
-  const getChapter = async (index: number) => {
-    if (
-      book.value.uid === 0 ||
-      index < 0 ||
-      index >= book.value.counter.chapter
-    ) return null
-
-    return getAndCacheChapter(book.value.uid, index)
+  const handleNextChapter = () => {
+    const key = `${book.value.uid}-${record.value.chapter + 1}`
+    chapterList.value.push(key)
   }
 
-  const nextChapter = async () => {
-    if (book.value.uid === 0) return
-    const next = await getChapter(book.value.latestRead.chapter + 1)
-    if (next !== null) {
-      chapterList.value.push(next)
-      book.value.latestRead.chapter += 1
+  const handleChapterPosition = async (key: string, value: ElementPosition, title: string) => {
+    if (record.value.uid === 0) return
+
+    if (value === ElementPosition.BodyInView) {
+      const [, chapterIndex] = key.split('-').map(it => +it)
+      record.value.chapter = chapterIndex
+      record.value.title = title
+      await updateRecord(record.value)
     }
   }
 
-  const init = async () => {
-    if (uid.value === 0) return
+  watch(
+    uidGetter,
+    async value => {
+      status.value = BookStatus.NotFound
 
-    let meta = await getBookByUid(uid.value) ?? null
-    if (meta === null) {
-      meta = await fetchBookMeta(uid.value)
-      if (meta !== null) {
-        await insertBook(meta)
+      if (isNaN(value) || value === 0) {
+        return
       }
-    }
 
-    if (meta === null) {
-      return
-    }
+      status.value = BookStatus.Loading
 
-    book.value = meta
-    const latest = await getChapter(book.value.latestRead.chapter)
-    if (latest !== null) {
-      chapterList.value.push(latest)
-    }
-  }
+      let meta = await getBookByUid(value) ?? null
+      if (meta === null) {
+        meta = await fetchBookMeta(value)
+        if (meta !== null) {
+          await insertBook(meta)
+        }
+      }
+      if (meta === null) {
+        status.value = BookStatus.NotFound
+        return
+      }
+      book.value = meta
+
+      const localRecord = await getRecordByUid(value)
+      if (localRecord === undefined) {
+        const newRecord: BookReadingRecord = {
+          uid: value,
+          chapter: -1,
+          title: '',
+          paragraph: 0,
+          line: 0,
+        }
+        await insertRecord(newRecord)
+        record.value = newRecord
+      } else {
+        record.value = localRecord
+      }
+
+      if (record.value.chapter !== -1) {
+        chapterList.value.push(`${value}-${record.value.chapter}`)
+      }
+
+      status.value = BookStatus.Ready
+    },
+    { immediate: true }
+  )
 
   return {
     book,
-    hasNext,
+    status,
+    record,
     chapterList,
-    hasPrev,
-    init,
-    nextChapter,
+    handleNextChapter,
+    handleChapterPosition,
+  }
+}
+
+export const useChapter = (keyGetter: () => string) => {
+  const status = ref<BookStatus>(BookStatus.NotFound)
+  const chapter = ref<BookChapterInterface>(EmptyChapter)
+
+  watch(
+    keyGetter,
+    async value => {
+      status.value = BookStatus.NotFound
+
+      if (value === '') return
+
+      status.value = BookStatus.Loading
+      const result = await getAndCacheChapter(value)
+      if (result === null) {
+        status.value = BookStatus.NotFound
+        return
+      }
+
+      chapter.value = result
+      status.value = BookStatus.Ready
+    },
+    {immediate: true}
+  )
+
+  return {
+    status,
+    chapter,
   }
 }
 

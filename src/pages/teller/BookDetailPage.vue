@@ -21,7 +21,6 @@ const copyMeta = (source: BookMetaInterface): BookMetaInterface => ({
   tags: Array.from(source.tags),
   mc: {...source.mc},
   counter: {...source.counter},
-  latestRead: {...source.latestRead},
 })
 
 const {

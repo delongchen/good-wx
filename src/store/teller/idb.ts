@@ -1,80 +1,91 @@
-import Dexie, {Table} from "dexie";
-import {BookChapterInterface, BookMetaInterface} from "@/types/teller/books";
+import Dexie, {Table, TransactionMode, TXWithTables} from "dexie";
+import {BookChapterInterface, BookMetaInterface, BookReadingRecord} from "@/types/teller/books";
 import * as keys from "@/store/keys";
 
 class BookDb extends Dexie {
   books!: Table<BookMetaInterface>
   chapters!: Table<BookChapterInterface>
+  records!: Table<BookReadingRecord>
 
   constructor() {
     super(keys.teller.bookStore)
     this.version(1).stores({
       books: '&uid',
-      chapters: '&key, book'
+      chapters: '&key, book',
+      records: '&uid'
     })
   }
 }
 
 const db = new BookDb()
 
-export const getAllBooks = async () => {
-  return db.transaction('r', db.books, async () => {
-    return db.books.toArray()
-  })
+type TransCallBack<T> = (trans: TXWithTables<BookDb>) => Promise<T>
+
+const dbTransactionHelper = (table: Table) => {
+  const createApi = (mode: TransactionMode) => {
+    return <T>(cb: TransCallBack<T>) => db.transaction(mode, table, cb)
+  }
+  const r = createApi('r')
+  const rw = createApi('rw')
+  return {r, rw,}
 }
 
-export const insertBook = async (meta: BookMetaInterface) => {
-  return db.transaction('rw', db.books, async () => {
-    const exist = await db.books.get(meta.uid)
-    if (exist === undefined) {
-      await db.books.put(meta)
+const tranBooks = dbTransactionHelper(db.books)
+const tranChapters = dbTransactionHelper(db.chapters)
+const tranRecords = dbTransactionHelper(db.records)
+
+export const getAllBooks = () => tranBooks.r(trans => trans.books.toArray())
+
+export const getBookByUid = async (uid: number) =>
+  tranBooks.r(trans => {
+    return trans.books.get(uid)
+  })
+
+export const insertBook = (meta: BookMetaInterface) =>
+  tranBooks.rw(async trans => {
+    if (await trans.books.get(meta.uid) === undefined) {
+      await trans.books.put(meta)
     }
   })
-}
 
-export const getChaptersByBook = async (uid: number) => {
-  return db.transaction('r', db.chapters, async () => {
-    return db.chapters
+export const getChaptersByBook = (uid: number) =>
+  tranChapters.r(trans => {
+    return trans.chapters
       .where('book')
       .equals(uid)
       .toArray()
   })
-}
 
-export const getChapterByKey = async (key: string) => {
-  return db.transaction('r', db.chapters, async () => {
-    return db.chapters.get(key)
+export const getChapterByKey = (key: string) =>
+  tranChapters.r(trans => {
+    return trans.chapters.get(key)
   })
-}
 
-export const insertChapter = async (chapter: BookChapterInterface) => {
-  return db.transaction('rw', db.chapters, async () => {
-    return db.chapters.put(chapter)
+export const insertChapter = (chapter: BookChapterInterface) =>
+  tranChapters.rw(async trans => {
+    await trans.chapters.put(chapter)
   })
-}
 
-export const insertChapters = async (chapters: BookChapterInterface[]) => {
-  return db.transaction('rw', db.chapters, async () => {
-    return db.chapters.bulkPut(chapters)
+export const insertChapters = (chapters: BookChapterInterface[]) =>
+  tranChapters.rw(async trans => {
+    await trans.chapters.bulkPut(chapters)
   })
-}
 
-export const getBookByUid = async (uid: number) => {
-  return db.transaction('r', db.books, async () => {
-    return db.books.get(uid)
+export const getRecordByUid = (uid: number) =>
+  tranRecords.r(trans => {
+    return trans.records.get(uid)
   })
-}
+
+export const insertRecord = (record: BookReadingRecord) =>
+  tranRecords.rw(async trans => {
+    await trans.records.put(record)
+  })
+
+export const updateRecord = (record: BookReadingRecord) =>
+  tranRecords.rw(async trans => {
+    await trans.records.update(record.uid, record)
+  })
 
 export const hasBook = async (uid: number) => {
   return (await getBookByUid(uid)) !== undefined
-}
-
-export const updateBook = async (meta: BookMetaInterface) => {
-  if (meta.uid === 0) return
-
-  return db.transaction('rw', db.books, async () => {
-    db.books.update(meta.uid, {
-      latestRead: {...meta.latestRead}
-    })
-  })
 }

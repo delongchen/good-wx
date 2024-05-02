@@ -11,12 +11,6 @@ const Api = {
 const fmtMeta = (meta: BookMetaInterface) => {
   meta.cover ??= req.join('teller', 'cover', meta.uid)
   meta.collection ??= '今日必读'
-  meta.latestRead = {
-    chapter: 0,
-    paragraph: 0,
-    line: 0,
-    char: 0,
-  }
 }
 
 export const fetchBookMetaList = async (): Promise<BookMetaInterface[]> => {
@@ -39,7 +33,11 @@ export const fetchBookMeta = (uid: number) => fetch(api.join('meta', uid))
 
 export const fetchFullBook = (uid: number) => fetch(api.join('book', uid)).catch(() => null)
 
-export const fetchChapter = async (book: number, index: number) => {
+export const fetchChapter = async (key: string) => {
+  const [book, index] = key.split('-').map(it => +it)
+
+  if ([book, index].some(isNaN)) return null
+
   return fetch(api.join('chapter', book, index))
     .then(res => res.json() as Promise<BookChapterInterface>)
     .then(chapter => {
