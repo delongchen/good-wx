@@ -56,6 +56,14 @@ export const TellerSubRouter: RouteRecordRaw[] = [
     meta: {
       hideTabBar: true
     }
+  },
+  {
+    name: 'cache-manager',
+    path: '/teller/cache-manager',
+    component: () => import('@/pages/teller/CacheManagerPage.vue'),
+    meta: {
+      hideTabBar: true
+    }
   }
 ]
 

@@ -19,7 +19,7 @@ class BookDb extends Dexie {
 
 const db = new BookDb()
 
-type TransCallBack<T> = (trans: TXWithTables<BookDb>) => Promise<T>
+type TransCallBack<T> = (trans: TXWithTables<BookDb>) => Promise<T> | T
 
 const dbTransactionHelper = (table: Table) => {
   const createApi = (mode: TransactionMode) => {
@@ -34,6 +34,9 @@ const tranBooks = dbTransactionHelper(db.books)
 const tranChapters = dbTransactionHelper(db.chapters)
 const tranRecords = dbTransactionHelper(db.records)
 
+/**********************/
+/*  actions of books  */
+/**********************/
 export const getAllBooks = () => tranBooks.r(trans => trans.books.toArray())
 
 export const getBookByUid = async (uid: number) =>
@@ -48,6 +51,8 @@ export const insertBook = (meta: BookMetaInterface) =>
     }
   })
 
+export const clearBooks = () => tranBooks.rw(trans => trans.books.clear())
+
 export const getChaptersByBook = (uid: number) =>
   tranChapters.r(trans => {
     return trans.chapters
@@ -56,10 +61,15 @@ export const getChaptersByBook = (uid: number) =>
       .toArray()
   })
 
+/**********************/
+/* actions of chapters */
+/**********************/
 export const getChapterByKey = (key: string) =>
   tranChapters.r(trans => {
     return trans.chapters.get(key)
   })
+
+export const getAllChapters = () => tranChapters.r(trans => trans.chapters.toArray())
 
 export const insertChapter = (chapter: BookChapterInterface) =>
   tranChapters.rw(async trans => {
@@ -71,10 +81,17 @@ export const insertChapters = (chapters: BookChapterInterface[]) =>
     await trans.chapters.bulkPut(chapters)
   })
 
+export const clearChapters = () => tranChapters.rw(trans => trans.chapters.clear())
+
+/**********************/
+/* actions of records */
+/**********************/
 export const getRecordByUid = (uid: number) =>
   tranRecords.r(trans => {
     return trans.records.get(uid)
   })
+
+export const getAllRecords = () => tranRecords.r(trans => trans.records.toArray())
 
 export const insertRecord = (record: BookReadingRecord) =>
   tranRecords.rw(async trans => {
@@ -86,6 +103,12 @@ export const updateRecord = (record: BookReadingRecord) =>
     await trans.records.update(record.uid, record)
   })
 
+export const clearRecords = () =>
+  tranRecords.rw(
+    trans => trans.records.clear()
+  )
+
+// other actions
 export const hasBook = async (uid: number) => {
   return (await getBookByUid(uid)) !== undefined
 }
