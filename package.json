@@ -12,6 +12,7 @@
   "dependencies": {
     "@vueuse/core": "^10.9.0",
     "dexie": "^4.0.4",
+    "monaco-editor": "^0.48.0",
     "pinia": "^2.1.7",
     "tdesign-icons-vue-next": "^0.2.2",
     "vue": "^3.4.19",
