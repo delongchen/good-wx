@@ -8,7 +8,7 @@ export const getTokensProvider = (): monaco.languages.IMonarchLanguage => {
   return {
     defaultToken: 'identifier',
     keywords: [
-      '$self', '$empty'
+      '$prev', '$empty', '$wx', '$w', '$x'
     ],
     typeKeywords: [],
     operators: [
@@ -38,9 +38,9 @@ export const getTokensProvider = (): monaco.languages.IMonarchLanguage => {
 
         // delimiters and operators
         [/[()\[\]]/, '@brackets'],
-        [/[<>](?!@symbols)/, '@brackets'],
         [/@symbols/, {
           cases: {
+            '>': 'delimiter.to',
             '@operators': 'delimiter',
             '@default': ''
           }
@@ -110,7 +110,9 @@ export const getThemeProvider = (): monaco.editor.IStandaloneThemeData => {
     base: 'vs-dark',
     inherit: true,
     rules: [
-      { token: 'identifier', foreground: '48b883' }
+      { token: 'identifier', foreground: '48b883' },
+      { token: 'delimiter.to', foreground: 'ffa500' },
+      { token: 'delimiter.bracket', foreground: '808080' }
     ],
     colors: {},
   }
