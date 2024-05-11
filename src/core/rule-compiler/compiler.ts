@@ -55,6 +55,26 @@ const scan = (source: string) => {
   const peek = () => isAtEnd() ? '' : source[current]
   const peekNext = () => current + 1 >= source.length ? '' : source[current + 1]
 
+  const startComment = () => {
+    const next = advance()
+    if (next === undefined) {
+      reportErr(line, 'comment is "//" or "/* any */"')
+      return
+    }
+
+    switch (next) {
+      case '/': {
+        while (peek() !== '\n' && !isAtEnd()) {
+          advance()
+        }
+        break
+      }
+      default: {
+
+      }
+    }
+  }
+
   const startString = (escape: string) => {
     while (peek() !== escape && !isAtEnd()) {
       if (peek() === '\n') line += 1
@@ -143,6 +163,10 @@ const scan = (source: string) => {
         break
       case '>':
         addToken(TellerRuleTokenType.Greater);
+        break
+
+      case '/':
+        startComment()
         break
 
       case ' ':

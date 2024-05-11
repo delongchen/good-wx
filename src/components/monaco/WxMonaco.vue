@@ -8,6 +8,7 @@ const props = withDefaults(
     value?: string,
     theme?: string,
     language?: string,
+    readonly?: boolean,
   }>(),
   {
     value: '',
@@ -37,6 +38,8 @@ onMounted(async () => {
   const editorInstance = monaco.editor.create(
     containerRef.value,
     {
+      value: '',
+      readOnly: props.readonly ?? false,
       fontSize: 13,
       tabSize: 2,
       theme: props.theme,

@@ -15,3 +15,6 @@ export const teller = {
   bookStore: createSubKey('teller', 'book', 'store'),
   readingSetting: createSubKey('teller', 'reading', 'setting')
 }
+export const ruleCompiler = {
+  editor: createSubKey('rule-compiler', 'editor')
+}
