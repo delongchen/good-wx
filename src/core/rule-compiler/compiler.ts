@@ -365,24 +365,27 @@ export const compile = (source: string) => {
   const [errors, tokens] = scan(source)
   if (errors.length !== 0) return errors
 
-  const result: Map<string, string> = new Map
-
   const replaceChainList = parse(tokens)
+  const replaceMap = new Map<string, string | null>()
   for (const chain of replaceChainList) {
     const [input, ...handlers] = chain
     if (input === undefined) continue
-    if (handlers.length === 0) continue
 
     const first = input.expand([], true)
+    for (const item of first) {
+      replaceMap.set(item, null)
+    }
+    if (handlers.length === 0) continue
+
     let last = first
     for (const handler of handlers) {
       last = handler.expand(last)
     }
-
-    for (let i = 0; i < last.length; i++)
+    for (let i = 0; i < first.length; i++) {
       if (first[i] !== last[i])
-        result.set(first[i], last[i])
+        replaceMap.set(first[i], last[i] ?? null)
+    }
   }
 
-  return result
+  return replaceMap
 }

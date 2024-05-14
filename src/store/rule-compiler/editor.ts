@@ -1,8 +1,8 @@
-import { TellerRuleSource } from "@/types/rule-compiler";
+import {TellerRuleSource} from "@/types/rule-compiler";
 import * as keys from '../keys'
 import {computed, ref} from "vue";
 import {useLocalStorage} from "@vueuse/core";
-import {getAllFiles, getFileByUid, updateFile} from "./idb.ts";
+import {getAllFiles, getFileByUid, updateFile, deleteFile} from "./idb.ts";
 
 const emptySource = (): TellerRuleSource => {
   const now = Date.now()
@@ -19,23 +19,24 @@ const editeHistory = useLocalStorage<TellerRuleSource>(
   emptySource,
 )
 
-export const useEditing = () => {
-  const changed = ref(false)
-  const localFiles = ref<TellerRuleSource[]>([])
+const localFiles = ref<TellerRuleSource[]>([])
+const editorReadonly = ref(false)
+const file = computed(() => {
+  return {
+    content: editeHistory.value.content,
+    uid: editeHistory.value.uid,
+    name: editeHistory.value.name,
+  }
+})
 
+export const useEditingFile = () => file
+
+export const useEditing = () => {
   const refreshLocalFiles = async () => {
     localFiles.value = (await getAllFiles()
       .catch(() => []))
       .sort((a, b) => b.latest - a.latest)
   }
-
-  const file = computed(() => {
-    return {
-      content: editeHistory.value.content,
-      uid: editeHistory.value.uid,
-      name: editeHistory.value.name,
-    }
-  })
 
   const setFileContent = (value: string) => {
     editeHistory.value.content = value
@@ -56,7 +57,6 @@ export const useEditing = () => {
       content: editeHistory.value.content,
       latest: editeHistory.value.latest,
     })
-    changed.value = false
     await refreshLocalFiles()
   }
 
@@ -68,16 +68,32 @@ export const useEditing = () => {
 
     await updateFile(empty)
     editeHistory.value.uid = empty.uid
-    changed.value = false
     await refreshLocalFiles()
   }
 
   const editFrom = async (uid: number) => {
+    if (editeHistory.value.uid === uid) return
+
     const exist = await getFileByUid(uid)
     if (exist !== undefined) {
       editeHistory.value = exist
     }
-    changed.value = false
+  }
+
+  const newSource = async (save: boolean = true) => {
+    if (save) {
+      await saveToDb()
+    }
+    editeHistory.value = emptySource()
+  }
+
+  const deleteSourceFile = async (uid: number) => {
+    if (uid === editeHistory.value.uid) {
+      await newSource(false)
+    }
+
+    await deleteFile(uid)
+    await refreshLocalFiles()
   }
 
   return {
@@ -85,11 +101,13 @@ export const useEditing = () => {
     setFileContent,
     setFileName,
     updateFileLatest,
-    changed,
     saveToDb,
     saveAs,
     localFiles,
     refreshLocalFiles,
     editFrom,
+    newSource,
+    editorReadonly,
+    deleteSourceFile,
   }
 }

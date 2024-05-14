@@ -37,3 +37,9 @@ export const updateFile = (file: TellerRuleSource) => {
     }
   })
 }
+
+export const deleteFile = (uid: number) => {
+  return db.transaction('rw', db.files, async trans => {
+    return trans.files.delete(uid)
+  })
+}

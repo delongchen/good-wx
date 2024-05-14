@@ -63,6 +63,15 @@ onMounted(async () => {
     {immediate: true}
   )
 
+  watch(
+    () => props.readonly,
+    value => {
+      editorInstance.updateOptions({
+        readOnly: value,
+      })
+    }
+  )
+
   editorInstance.onDidChangeModelContent(() => {
     emits('change', editorInstance.getValue())
   })

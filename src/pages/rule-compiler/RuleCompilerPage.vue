@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import WxMonaco from "@/components/monaco/WxMonaco.vue";
-import {computed, ref, watch} from "vue";
+import {computed, ref} from "vue";
 import {debounce} from "@/utils/fn.ts";
 import * as TellerRuleLang from '@/core/monaco/lang/teller-rule'
 import {compile} from "@/core/rule-compiler/compiler.ts";
-import { FileIcon, ArrowLeftIcon, SaveIcon, EditIcon } from 'tdesign-icons-vue-next'
+import { ArrowLeftIcon, EditIcon } from 'tdesign-icons-vue-next'
 import {useRouter} from "vue-router";
 import {useEditing} from "@/store/rule-compiler/editor.ts";
+import AsideBar from './aside-bar/index.vue'
 
 const router = useRouter()
 const {
@@ -14,47 +15,45 @@ const {
   setFileContent,
   updateFileLatest,
   setFileName,
-  changed,
   saveToDb,
   saveAs,
-  localFiles,
-  refreshLocalFiles,
-  editFrom,
+  editorReadonly,
 } = useEditing()
 
-const output = ref<any>(null)
+const compileErrors = ref<{line: number, message: string}[]>([])
+const compileResult = ref<Map<string, string | null>>(new Map)
+
+const compileSource = () => {
+  const result = compile(file.value.content)
+  if (Array.isArray(result)) {
+    compileErrors.value = result
+    compileResult.value.clear()
+  } else {
+    compileErrors.value = []
+    compileResult.value = result
+  }
+}
 
 const fileName = computed({
   get() {
     return file.value.name
   },
   set(value: string) {
-    changed.value = true
     setFileName(value)
   }
 })
 const fileNameEditable = ref(false)
 
 const handleSourceChange = debounce((value: string) => {
-  changed.value = true
   setFileContent(value)
   updateFileLatest()
 }, 250)
 
-const showSidePanel = ref(false)
-
-watch(
-  () => showSidePanel.value,
-  async show => {
-    if (show) {
-      await refreshLocalFiles()
-    }
-  }
-)
-
 const backHome = () => {
   router.replace({ path: '/' })
 }
+
+const asideValue = ref('')
 </script>
 
 <template>
@@ -77,74 +76,35 @@ const backHome = () => {
         >
       </div>
       <div class="editor-tool-bar">
-        <div v-if="changed" style="padding-right: 10px;">有改动 记得保存 -> </div>
         <div class="editor-tool-bar-item" @click="saveToDb">
-          <save-icon/>
+          保存
         </div>
         <div class="editor-tool-bar-item" @click="saveAs">
           另存为
+        </div>
+        <div class="editor-tool-bar-item" @click="compileSource">
+          编译
         </div>
       </div>
     </header>
     <div class="rule-compiler-content">
       <aside>
-        <div
-          class="left-aside-panel"
-        >
-          <div class="left-aside-bar">
-            <div
-              class="left-aside-bar-btn"
-              :style="{
-                background: showSidePanel ? '#2a2a2a': ''
-              }"
-              @click="() => {
-                showSidePanel = !showSidePanel
-              }"
-            >
-              <file-icon size="x-large"/>
-            </div>
-          </div>
-          <div
-            v-show="showSidePanel"
-            class="left-aside-content"
-          >
-            <div></div>
-            <div style="padding: 10px;">
-              <div
-                v-for="f in localFiles"
-                :key="f.uid"
-                class="local-file-card"
-              >
-                <div style="display: flex">
-                  <div style="width: 70%;">
-                    <div
-                      style="display: inline-block; width: 10px; height: 10px; background: #48b883; border-radius: 5px;"
-                      v-show="file.uid === f.uid"
-                    />
-                    {{f.name}}
-                  </div>
-                  <div style="flex: 1; display: flex; flex-direction: row-reverse;">
-                    <edit-icon style="cursor: pointer" @click="() => {editFrom(f.uid)}"/>
-                  </div>
-                </div>
-                <div style="margin-top: 10px; font-size: small;">
-                  {{f.content.length > 100 ? f.content.slice(0, 100) + '...' : f.content}}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <aside-bar v-model="asideValue"/>
       </aside>
       <main>
         <wx-monaco
           style="flex: 2; height: calc(100vh - 64px)"
           :theme="TellerRuleLang.themeName"
+          :readonly="editorReadonly"
           :language="TellerRuleLang.id"
           :value="file.content"
           @change="handleSourceChange"
         />
-        <div style="flex: 1;">
-          <div>{{output}}</div>
+        <div style="flex: 1; height: calc(100vh - 64px); overflow: scroll; scrollbar-width: none;">
+          <div>
+            <div>{{compileErrors}}</div>
+            <div>{{compileResult}}</div>
+          </div>
         </div>
       </main>
       <aside></aside>
@@ -203,38 +163,6 @@ footer {
   height: calc(100vh - 64px);
   flex: 1;
   display: flex;
-}
-
-.left-aside-panel {
-  height: 100%;
-  display: flex;
-
-  .left-aside-bar {
-    display: flex;
-    flex-direction: column;
-    border-right: @panel-border;
-  }
-
-  .left-aside-bar-btn {
-    cursor: pointer;
-    padding: 10px;
-  }
-
-  .left-aside-content {
-    height: 100%;
-    background: #2a2a2a;
-    width: 256px;
-    border-right: @panel-border;
-    overflow: scroll;
-    scrollbar-width: none;
-  }
-}
-
-.local-file-card {
-  margin-top: 10px;
-  border-radius: 4px;
-  padding: 10px;
-  background: black;
 }
 
 main {
