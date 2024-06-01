@@ -82,6 +82,7 @@ updateCacheInfo()
 <style scoped lang="less">
 .cache-info-card {
   background-color: white;
+  margin-bottom: 10px;
 }
 
 .line-btn {

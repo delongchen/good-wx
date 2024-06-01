@@ -26,6 +26,14 @@ export const TellerSubRouter: RouteRecordRaw[] = [
     },
   },
   {
+    name: 'rule-detail',
+    path: '/teller/rule/detail',
+    component: () => import('@/pages/teller/TellerRuleDetail.vue'),
+    meta: {
+      hideTabBar: true
+    }
+  },
+  {
     path: '/teller/home',
     component: () => import('@/pages/teller/TellerHomePage.vue'),
     meta: {

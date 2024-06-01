@@ -1,18 +1,20 @@
 import Dexie, {Table, TransactionMode, TXWithTables} from "dexie";
-import {BookChapterInterface, BookMetaInterface, BookReadingRecord} from "@/types/teller/books";
+import {BookChapterInterface, BookMetaInterface, BookReadingRecord, TellerRuleRaw} from "@/types/teller/books";
 import * as keys from "@/store/keys";
 
 class BookDb extends Dexie {
   books!: Table<BookMetaInterface>
   chapters!: Table<BookChapterInterface>
   records!: Table<BookReadingRecord>
+  rules!: Table<TellerRuleRaw>
 
   constructor() {
     super(keys.teller.bookStore)
     this.version(1).stores({
       books: '&uid',
       chapters: '&key, book',
-      records: '&uid'
+      records: '&uid',
+      rules: '&uid',
     })
   }
 }
@@ -33,6 +35,7 @@ const dbTransactionHelper = (table: Table) => {
 const tranBooks = dbTransactionHelper(db.books)
 const tranChapters = dbTransactionHelper(db.chapters)
 const tranRecords = dbTransactionHelper(db.records)
+const tranRules = dbTransactionHelper(db.rules)
 
 /**********************/
 /*  actions of books  */
@@ -106,6 +109,22 @@ export const updateRecord = (record: BookReadingRecord) =>
 export const clearRecords = () =>
   tranRecords.rw(
     trans => trans.records.clear()
+  )
+
+/**********************/
+/* actions of rules */
+/**********************/
+export const insertRule = (raw: TellerRuleRaw) =>
+  tranRules.rw(
+    async trans => {
+      await trans.rules.put(raw)
+    }
+  )
+
+export const getAllRules = () => tranRules.r(trans => trans.rules.toArray())
+export const getRuleByUid = (uid: number) =>
+  tranRules.r(
+    trans => trans.rules.get(uid)
   )
 
 // other actions

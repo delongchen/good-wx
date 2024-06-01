@@ -32,3 +32,19 @@ export interface BookMetaInterface {
   mc: Record<string, string>
   counter: BookCounterInterface
 }
+
+export interface TellerRuleReplacement {
+  value: string | null
+  classes: number[]
+}
+
+export interface TellerRuleMeta {
+  name: string
+  uid: number
+  desc: string
+  latest: number
+}
+
+export interface TellerRuleRaw extends TellerRuleMeta {
+  entries: [string, TellerRuleReplacement][]
+}

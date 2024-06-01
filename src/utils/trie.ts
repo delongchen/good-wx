@@ -1,35 +1,66 @@
 export class TrieNode<T> {
-  children: Map<string, TrieNode<T>> = new Map
-  value: string = ''
-  payload: T | null = null
+  private children: Map<string, TrieNode<T>> = new Map
+  private payload: T | null = null
 
-  constructor(value?: string) {
-    if (value !== undefined) {
-      this.value = value
+  static from<V>(entries: [string, V][]) {
+    const root = new TrieNode<V>()
+    for (const entry of entries) {
+      root.put(entry[0], entry[1])
     }
+    return root
   }
 
-  private _insert(key: string, payload: T) {
-    let cur: TrieNode<T> = this
+  private _put(path: string, payload: T) {
+    const root: TrieNode<T> = this
+    let curNode = root
 
-    for (const char of key) {
-      const exist = cur.children.get(char)
-      if (exist !== undefined) {
-        cur = exist
-        continue
+    for (const char of path) {
+      const existChild = curNode.children.get(char)
+      if (existChild === undefined) {
+        const newNode = new TrieNode<T>()
+        curNode.children.set(char, newNode)
+        curNode = newNode
+      } else {
+        curNode = existChild
+      }
+    }
+
+    curNode.payload = payload
+
+    return root
+  }
+
+  put(path: string, payload: T) {
+    return this._put(path, payload)
+  }
+
+  maxMatch(path: string) {
+    const root: TrieNode<T> = this
+    let curNode = root
+    const stack: TrieNode<T>[] = []
+
+    for (const char of path) {
+      const existChild = curNode.children.get(char)
+      if (existChild === undefined) {
+        break
       }
 
-      const newNode = new TrieNode<T>(char)
-      cur.children.set(char, newNode)
-      cur = newNode
+      stack.push(existChild)
+      curNode = existChild
     }
 
-    cur.payload = payload
-  }
+    while (stack.length !== 0) {
+      const last = stack[stack.length - 1]
+      if (last.payload === null) {
+        stack.pop()
+      } else {
+        return {
+          matched: path.slice(0, stack.length),
+          payload: last.payload!
+        }
+      }
+    }
 
-  insert(key: string, payload: T) {
-    if (key.length === 0) return
-    this._insert(key, payload)
+    return null
   }
 }
-

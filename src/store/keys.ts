@@ -13,7 +13,8 @@ export const resonance = {
 export const teller = {
   history: createSubKey('teller', 'history'),
   bookStore: createSubKey('teller', 'book', 'store'),
-  readingSetting: createSubKey('teller', 'reading', 'setting')
+  readingSetting: createSubKey('teller', 'reading', 'setting'),
+  ruleSetting: createSubKey('teller', 'rule', 'setting'),
 }
 export const ruleCompiler = {
   editor: createSubKey('rule-compiler', 'editor')

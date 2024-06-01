@@ -16,13 +16,15 @@ const pushRoute = (name: string) => {
   >
     <div style="height: 30vh;"></div>
     <div>
-      <wx-cell-group title="常规设置">
+      <wx-cell-group title="常规设置" style="margin-bottom: 10px;">
         <wx-cell
           title="缓存管理"
           arrow
           @click="() => { pushRoute('cache-manager') }"
         />
       </wx-cell-group>
+
+      <wx-cell title="退出wx阅读" arrow @click="() => { router.replace('/') }"/>
     </div>
   </div>
 </template>

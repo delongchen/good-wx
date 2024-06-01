@@ -11,6 +11,7 @@ import {useIntersectionObserver, useNow} from '@vueuse/core'
 import WxBattery from "@/components/wx/WxBattery.vue";
 import {useRoute} from "vue-router";
 import TellerChapter from "@/pages/teller/components/TellerChapter.vue";
+import RuleSetting from "@/pages/teller/components/RuleSetting.vue";
 
 const route = useRoute()
 const {
@@ -227,6 +228,7 @@ const nextChapterTrigger = useIntersectionObserver(
     }"
   >
     <reading-settings v-if="curTabBarItem === 'settings'"/>
+    <rule-setting v-else-if="curTabBarItem === 'rules'"/>
   </div>
 </template>
 

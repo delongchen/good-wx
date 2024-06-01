@@ -2,6 +2,7 @@
 import {BookStatus, useChapter, useReadingSetting} from "@/store/teller/reading.ts";
 import {computed, ref, watch} from "vue";
 import {ElementPosition, useElementPosition} from "@/utils/el.ts";
+import {useRule} from "@/store/teller/rules.ts";
 
 const props = defineProps<{
   chapterKey: string
@@ -30,14 +31,18 @@ const fontSizeStr = computed(() => {
     title: `${size + 4}px`,
     p: `${size}px`,
     space: `${size * 2}px`,
+    lineSpace: `${(size * 1.8) >> 0}px`
   }
 })
 
 const { position } = useElementPosition(panelRef)
-
 watch(() => position.value, (value) => {
   emits('positionChange', props.chapterKey, value, chapter.value.title)
 })
+
+const {
+  replaceFn,
+} = useRule()
 </script>
 
 <template>
@@ -67,9 +72,16 @@ watch(() => position.value, (value) => {
           <div
             v-for="(line, lineIndex) in p"
             :key="lineIndex"
+            :style="{
+              marginBottom: fontSizeStr.p,
+              lineHeight: fontSizeStr.lineSpace,
+            }"
           >
             <span :style="{ width: fontSizeStr.space, display: 'inline-block' }"></span>
-            <span>{{line}}</span>
+            <span
+              v-for="(chunk, chunkIndex) in replaceFn(line)"
+              :key="chunkIndex"
+            >{{chunk.value}}</span>
           </div>
         </div>
       </div>
@@ -85,6 +97,5 @@ watch(() => position.value, (value) => {
 
 .teller-chapter-title {
   font-weight: bold;
-
 }
 </style>
