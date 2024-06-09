@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {BookStatus, useChapter, useReadingSetting} from "@/store/teller/reading.ts";
+import * as keys from '@/store/keys'
 import {computed, ref, watch} from "vue";
 import {ElementPosition, useElementPosition} from "@/utils/el.ts";
 import {useRule} from "@/store/teller/rules.ts";
@@ -81,6 +82,7 @@ const {
             <span
               v-for="(chunk, chunkIndex) in replaceFn(line)"
               :key="chunkIndex"
+              :class="chunk.classes.map(it => `${keys.teller.replaceStyle}-${it}`)"
             >{{chunk.value}}</span>
           </div>
         </div>

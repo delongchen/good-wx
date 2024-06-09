@@ -19,7 +19,7 @@ const {
   status: bookStatus,
   record,
   chapterList,
-  handleNextChapter,
+  handleTrigger,
   handleChapterPosition,
 } = useBook(() => +(route.query?.uid ?? 0))
 
@@ -105,12 +105,21 @@ const tabBarItems = [
   },
 ]
 
+const prevChapterTriggerRef = ref<HTMLDivElement | null>(null)
 const nextChapterTriggerRef = ref<HTMLDivElement | null>(null)
-const nextChapterTrigger = useIntersectionObserver(
-  nextChapterTriggerRef,
-  ([{ isIntersecting }]) => {
-    if (isIntersecting) {
-      handleNextChapter()
+const chapterTrigger = useIntersectionObserver(
+  [prevChapterTriggerRef, nextChapterTriggerRef],
+  (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue
+
+      const id = entry.target.id ?? ''
+      if (!id.endsWith('-chapter-trigger')) {
+        continue
+      }
+
+      const [, triggerName] = id.split('-')
+      handleTrigger(triggerName)
     }
   }
 )
@@ -164,7 +173,9 @@ const nextChapterTrigger = useIntersectionObserver(
       <div>
         <div
           class="chapter-trigger"
-          v-if="record.chapter > 0"
+          id="teller-prev-chapter-trigger"
+          ref="prevChapterTriggerRef"
+          v-if="chapterTrigger.isSupported && record.chapter > 0"
         ></div>
 
         <div>
@@ -177,7 +188,8 @@ const nextChapterTrigger = useIntersectionObserver(
         </div>
 
         <div
-          v-if="nextChapterTrigger.isSupported"
+          v-if="chapterTrigger.isSupported && record.chapter < book.counter.chapter"
+          id="teller-next-chapter-trigger"
           class="chapter-trigger"
           ref="nextChapterTriggerRef"
         ></div>

@@ -35,7 +35,7 @@ export interface BookMetaInterface {
 
 export interface TellerRuleReplacement {
   value: string | null
-  classes: number[]
+  classes: (number | string)[]
 }
 
 export interface TellerRuleMeta {

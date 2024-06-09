@@ -44,21 +44,43 @@ export const useBook = (uidGetter: () => number) => {
   const book = ref<BookMetaInterface>(EmptyBookMeta)
   const status = ref<BookStatus>(BookStatus.NotFound)
   const record = ref<BookReadingRecord>(EmptyReadingRecord)
-  const chapterList = ref<string[]>([])
+  const chapterSet = ref<Set<number>>(new Set)
 
-  const handleNextChapter = () => {
-    const key = `${book.value.uid}-${record.value.chapter + 1}`
-    chapterList.value.push(key)
+  const chapterList = computed<string[]>(() => {
+    if (book.value.uid === 0) return []
+
+    const set = chapterSet.value
+    return [...set]
+      .sort((a, b) => a - b)
+      .map(it => `${book.value.uid}-${it}`)
+  })
+
+  const handleTrigger = (name: string) => {
+    if (name === 'prev') {
+      chapterSet.value.add(record.value.chapter - 1)
+    }
+
+    if (name === 'next') {
+      chapterSet.value.add(record.value.chapter + 1)
+    }
   }
 
   const handleChapterPosition = async (key: string, value: ElementPosition, title: string) => {
     if (record.value.uid === 0) return
 
+    const [, chapterIndex] = key.split('-').map(it => +it)
+
     if (value === ElementPosition.BodyInView) {
-      const [, chapterIndex] = key.split('-').map(it => +it)
       record.value.chapter = chapterIndex
       record.value.title = title
       await updateRecord(record.value)
+    }
+
+    if (
+      value === ElementPosition.OverView ||
+      value === ElementPosition.UnderView
+    ) {
+      chapterSet.value.delete(chapterIndex)
     }
   }
 
@@ -102,7 +124,7 @@ export const useBook = (uidGetter: () => number) => {
       }
 
       if (record.value.chapter !== -1) {
-        chapterList.value.push(`${value}-${record.value.chapter}`)
+        chapterSet.value.add(record.value.chapter)
       }
 
       status.value = BookStatus.Ready
@@ -115,7 +137,7 @@ export const useBook = (uidGetter: () => number) => {
     status,
     record,
     chapterList,
-    handleNextChapter,
+    handleTrigger,
     handleChapterPosition,
   }
 }

@@ -4,7 +4,7 @@ import {computed, ref} from "vue";
 import {debounce} from "@/utils/fn.ts";
 import * as TellerRuleLang from '@/core/monaco/lang/teller-rule'
 import {compile} from "@/core/rule-compiler/compiler.ts";
-import { ArrowLeftIcon, EditIcon } from 'tdesign-icons-vue-next'
+import {ArrowLeftIcon, EditIcon} from 'tdesign-icons-vue-next'
 import {useRouter} from "vue-router";
 import {useEditing} from "@/store/rule-compiler/editor.ts";
 import AsideBar from './aside-bar/index.vue'
@@ -20,18 +20,25 @@ const {
   editorReadonly,
 } = useEditing()
 
-const compileErrors = ref<{line: number, message: string}[]>([])
-const compileResult = ref<Map<string, string | null>>(new Map)
-
+const compileResult = ref<any>(null)
 const compileSource = () => {
   const result = compile(file.value.content)
-  if (Array.isArray(result)) {
-    compileErrors.value = result
-    compileResult.value.clear()
-  } else {
-    compileErrors.value = []
-    compileResult.value = result
+  if (result === null) {
+    compileResult.value = null
+    return
   }
+
+  const entries = [...result.entries()]
+  compileResult.value = JSON.stringify(
+    entries.map(it => {
+      return [it[0], {
+        value: it[1],
+        classes: [],
+      }]
+    }),
+    null,
+    2,
+  )
 }
 
 const fileName = computed({
@@ -50,7 +57,7 @@ const handleSourceChange = debounce((value: string) => {
 }, 250)
 
 const backHome = () => {
-  router.replace({ path: '/' })
+  router.replace({path: '/'})
 }
 
 const asideValue = ref('')
@@ -93,7 +100,7 @@ const asideValue = ref('')
       </aside>
       <main>
         <wx-monaco
-          style="flex: 2; height: calc(100vh - 64px)"
+          style="flex: 1; height: calc(100vh - 64px)"
           :theme="TellerRuleLang.themeName"
           :readonly="editorReadonly"
           :language="TellerRuleLang.id"
@@ -102,8 +109,7 @@ const asideValue = ref('')
         />
         <div style="flex: 1; height: calc(100vh - 64px); overflow: scroll; scrollbar-width: none;">
           <div>
-            <div>{{compileErrors}}</div>
-            <div>{{compileResult}}</div>
+            <pre>{{ compileResult }}</pre>
           </div>
         </div>
       </main>
@@ -141,6 +147,7 @@ header {
   .editor-tool-bar-item {
     margin-left: 10px;
     cursor: pointer;
+
     &:hover {
       color: #48b883;
     }

@@ -363,7 +363,7 @@ const parse = (tokens: TellerRuleToken[]) => {
 
 export const compile = (source: string) => {
   const [errors, tokens] = scan(source)
-  if (errors.length !== 0) return errors
+  if (errors.length !== 0) return null
 
   const replaceChainList = parse(tokens)
   const replaceMap = new Map<string, string | null>()

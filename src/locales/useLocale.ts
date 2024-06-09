@@ -1,7 +1,7 @@
 import {useI18n} from "vue-i18n";
 import { langCodeSet, DefaultLang } from './index.ts'
 import {useLocalStorage} from "@vueuse/core";
-import * as storeKeys from '../../../../../Desktop/charger/src/store/keys.ts'
+import * as storeKeys from '@/store/keys'
 
 export const useLocale = () => {
   const { locale, t } = useI18n({useScope: 'global'})

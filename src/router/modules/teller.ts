@@ -60,7 +60,7 @@ export const TellerSubRouter: RouteRecordRaw[] = [
   {
     name: 'reading',
     path: '/teller/reading',
-    component: () => import('@/pages/teller/ReadingPage.vue'),
+    component: () => import('@/pages/teller/reading/ReadingPage.vue'),
     meta: {
       hideTabBar: true
     }

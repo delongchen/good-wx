@@ -20,6 +20,7 @@ const {
   localRuleMap,
 } = useRule()
 
+const desc = ref('')
 const li = ref<[string, string][]>([])
 
 watch(
@@ -29,6 +30,7 @@ watch(
     const exist = map.get(info.uid)
     if (exist === undefined) return
 
+    desc.value = exist.desc
     const { entries } = exist
     const filtered: [string, string][] = []
     for (const entry of entries) {
@@ -49,6 +51,9 @@ watch(
     show-header
   >
     <div style="padding: 10px;">
+      <h2>描述:</h2>
+      <div>{{desc}}</div>
+      <h2>规则详细:</h2>
       <div
         v-for="(entry, index) in li"
         :key="index"

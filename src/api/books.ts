@@ -1,11 +1,12 @@
 import {sub} from "@/utils/requests";
-import {BookChapterInterface, BookMetaInterface} from "@/types/teller/books";
+import {BookChapterInterface, BookMetaInterface, TellerRuleRaw} from "@/types/teller/books";
 import * as req from "@/utils/requests.ts";
 
 const api = sub('teller')
 
 const Api = {
   MetaList: api.join('books'),
+  RuleList: api.join('rules')
 }
 
 const fmtMeta = (meta: BookMetaInterface) => {
@@ -47,3 +48,7 @@ export const fetchChapter = async (key: string) => {
     })
     .catch(() => null)
 }
+
+export const fetchRules = () => fetch(Api.RuleList)
+  .then(res => res.json() as Promise<TellerRuleRaw[]>)
+  .catch(() => ([] as TellerRuleRaw[]))

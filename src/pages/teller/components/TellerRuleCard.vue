@@ -36,7 +36,10 @@ const handleDownload = () => {
         class="rule-status-tag"
       >可更新</div>
     </div>
-    <div style="padding: 10px 0 25px 0;">{{props.rule.desc}}</div>
+    <div style="padding: 10px 0 25px 0;">
+      {{props.rule.desc.slice(0, 101)}}
+      {{props.rule.desc.length > 100 ? '...': ''}}
+    </div>
     <div
       style="
         display: flex;
