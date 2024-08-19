@@ -29,27 +29,6 @@ interface HomeCardType {
 
 const cards: HomeCardType[] = [
   {
-    title: '祈福',
-    sub: '敲木鱼',
-    path: '/muyu',
-    desc: [
-      '吴翔是我们的好兄弟',
-      '亦是肥子肥父肥灵三肥一体',
-      '没事就来敲一敲木鱼吧',
-      '啊! 翔门!'
-    ]
-  },
-  {
-    title: '开火车',
-    sub: '雷索纳斯 resonance',
-    path: '/resonance',
-    desc: [
-      '开电子火车',
-      '当赛博倒爷',
-      '来一起当列车长帕!'
-    ]
-  },
-  {
     title: 'wx小说',
     sub: '深黑幻想',
     path: '/teller',

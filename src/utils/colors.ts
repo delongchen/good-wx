@@ -5,8 +5,8 @@
 
 import {basisOf, moduleOf} from "@/utils/vector.ts";
 
-const fmtRGBHex = (hex: string): string | null => {
-  if (!hex.startsWith('#')) return null
+const fmtRGBHex = (hex: string): number => {
+  if (!hex.startsWith('#')) return NaN
 
   hex = hex.slice(1)
 
@@ -23,10 +23,10 @@ const fmtRGBHex = (hex: string): string | null => {
   }
 
   if (hex.length !== 8) {
-    return null
+    return NaN
   }
 
-  return hex
+  return parseInt(hex, 16)
 }
 
 const fmtColorValue = (value: number) => {
@@ -74,12 +74,12 @@ export class ColorHelper {
 
   static fromHex(raw: string): ColorHelper {
     const hex = fmtRGBHex(raw)
-    if (hex === null) return new ColorHelper
+    if (isNaN(hex)) return new ColorHelper
 
-    const red = parseInt(hex.slice(0, 2), 16)
-    const green = parseInt(hex.slice(2, 4), 16)
-    const blue = parseInt(hex.slice(4, 6), 16)
-    const alpha = parseInt(hex.slice(6, 8), 16)
+    const red = (hex >> 24) & 255
+    const green = (hex >> 16) & 255
+    const blue = (hex >> 8) & 255
+    const alpha = hex & 255
 
     if ([red, green, blue, alpha].some(isNaN)) {
       return new ColorHelper
